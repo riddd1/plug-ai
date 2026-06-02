@@ -436,6 +436,26 @@ select{border-radius:7px;border-color:rgba(139,92,246,0.18);transition:border-co
 /* Create Slideshow — fuchsia/purple */
 .bottom-btns > button:nth-child(3){background:linear-gradient(90deg,#7c3aed,#db2777)!important;border:none!important;color:#fff!important}
 .bottom-btns > button:nth-child(3):hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(219,39,119,0.4)!important;opacity:1!important}
+/* Typing Video — teal/green */
+.bottom-btns > button:nth-child(4){background:linear-gradient(90deg,#059669,#10b981)!important;border:none!important;color:#fff!important}
+.bottom-btns > button:nth-child(4):hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(16,185,129,0.4)!important;opacity:1!important}
+
+/* ── Typing Video Modal ── */
+#typing-video-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:400;align-items:center;justify-content:center;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+#typing-video-modal.show{display:flex}
+.tv-box{background:#141416;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:22px;width:340px;display:flex;flex-direction:column;gap:14px;box-shadow:0 24px 80px rgba(0,0,0,0.7)}
+.tv-heading{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.2px}
+.tv-sub{font-size:11px;color:rgba(255,255,255,0.35);margin-top:-8px;line-height:1.5}
+.tv-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.tv-input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none}
+.tv-input:focus{border-color:rgba(232,168,124,0.45)}
+.tv-btns{display:flex;gap:5px}
+.tv-btn{flex:1;padding:7px 4px;font-size:11px;font-weight:700;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.45);cursor:pointer;transition:all .15s;font-family:inherit;text-align:center}
+.tv-btn.on{background:rgba(232,168,124,0.14);border-color:rgba(232,168,124,0.45);color:#e8a87c}
+.tv-gen{width:100%;background:linear-gradient(90deg,#059669,#10b981);border:none;color:#fff;border-radius:10px;padding:13px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .2s}
+.tv-gen:disabled{opacity:.4;cursor:default}
+.tv-cancel{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);border-radius:8px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.tv-status{font-size:11px;color:rgba(255,255,255,0.4);text-align:center;display:none}
 
 /* ── Preview area — dot grid canvas feel ── */
 .preview-area{background-color:#07070e;background-image:radial-gradient(rgba(139,92,246,0.08) 1px,transparent 1px);background-size:22px 22px}
@@ -790,6 +810,10 @@ button,input,select,textarea{transition-property:background,border-color,color,b
       <button class="gbtn sec" onclick="openSlideshowModal()">
         <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
         Create Slideshow
+      </button>
+      <button class="gbtn sec" onclick="openTypingVideoModal()">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Typing Video
       </button>
     </div>
   </div>
@@ -2768,7 +2792,233 @@ function showToast(msg) {
   switchTab('builder');
   setTimeout(() => showToast('Script imported from Script Maker'), 300);
 })();
+
+// ══════════════════════════════════════════════════════════════════════
+// ── TYPING VIDEO ──
+// ══════════════════════════════════════════════════════════════════════
+let _tvSpeed = 2, _tvPause = 1;
+
+function openTypingVideoModal() {
+  document.getElementById('typing-video-modal').classList.add('show');
+}
+function closeTypingVideoModal() {
+  document.getElementById('typing-video-modal').classList.remove('show');
+}
+function tvSetSpeed(v) {
+  _tvSpeed = v;
+  document.querySelectorAll('[data-speed]').forEach(b => b.classList.toggle('on', parseFloat(b.dataset.speed) === v));
+}
+function tvSetPause(v) {
+  _tvPause = v;
+  document.querySelectorAll('[data-pause]').forEach(b => b.classList.toggle('on', parseFloat(b.dataset.pause) === v));
+}
+
+function _tvRR(ctx, x, y, w, h, r, color) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath(); ctx.fillStyle=color; ctx.fill();
+}
+
+function _tvWrap(ctx, text, maxW) {
+  const words = text.split(' ');
+  const lines = []; let line = '';
+  for (const w of words) {
+    const t = line ? line+' '+w : w;
+    if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; }
+    else line = t;
+  }
+  if (line) lines.push(line);
+  return lines.length ? lines : [''];
+}
+
+function _tvFrame(ctx, W, H, visMsgs, typing, title, showKbd, rightColor) {
+  const S = W / 390;
+  ctx.fillStyle = '#000'; ctx.fillRect(0,0,W,H);
+
+  let y = 50*S;
+
+  // Caption
+  if (title) {
+    ctx.font = `bold ${44*S}px system-ui,-apple-system,sans-serif`;
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'left';
+    const tLines = _tvWrap(ctx, title, W - 40*S);
+    for (const l of tLines) { ctx.fillText(l, 20*S, y); y += 54*S; }
+    y += 16*S;
+  }
+
+  // Messages
+  const FS = 19*S, LH = 26*S, PX = 14*S, PY = 10*S;
+  const MAXW = 280*S, MARG = 12*S, RAD = 20*S;
+  ctx.font = `${FS}px system-ui,-apple-system,sans-serif`;
+
+  for (const msg of visMsgs) {
+    if (!msg.text) continue;
+    const lines = _tvWrap(ctx, msg.text, MAXW - PX*2);
+    let bw = Math.min(Math.max(...lines.map(l => ctx.measureText(l).width)) + PX*2, MAXW);
+    const bh = lines.length*LH + PY*2;
+    const isR = msg.side === 'right';
+    const bx = isR ? W-MARG-bw : MARG;
+    _tvRR(ctx, bx, y, bw, bh, RAD, isR ? (rightColor||'#7c5cbf') : '#262626');
+    ctx.fillStyle = '#fff'; ctx.textAlign = isR ? 'right' : 'left';
+    for (let i=0; i<lines.length; i++) {
+      ctx.fillText(lines[i], isR ? bx+bw-PX : bx+PX, y+PY+(i+0.8)*LH);
+    }
+    y += bh + 4*S;
+  }
+
+  // Typing dots
+  if (typing.show) {
+    const bw=72*S, bh=44*S, isR=typing.side==='right';
+    const bx = isR ? W-MARG-bw : MARG;
+    _tvRR(ctx, bx, y, bw, bh, RAD, '#262626');
+    const cy=y+bh/2, cx0=bx+bw/2-12*S;
+    for (let d=0; d<3; d++) {
+      const dp=((typing.phase||0) - d*120 + 720)%360;
+      const bob = -Math.max(0,Math.sin(dp*Math.PI/180))*5*S;
+      ctx.beginPath(); ctx.arc(cx0+d*12*S, cy+bob, 5*S, 0, Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.fill();
+    }
+  }
+
+  // Keyboard
+  if (showKbd) {
+    const kh = 260*S, ky = H-kh;
+    ctx.fillStyle='#1c1c1e'; ctx.fillRect(0,ky,W,kh);
+    ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.fillRect(0,ky,W,1);
+    // Message bar
+    const barH=42*S, barY=ky-barH-8*S;
+    _tvRR(ctx,MARG,barY,W-MARG*2,barH,barH/2,'#1c1c1e');
+    ctx.fillStyle='rgba(255,255,255,0.25)'; ctx.font=`${14*S}px system-ui`;
+    ctx.textAlign='left'; ctx.fillText('Message…', MARG+16*S, barY+barH*0.65);
+    // Key rows
+    const rows=[['q','w','e','r','t','y','u','i','o','p'],
+                ['a','s','d','f','g','h','j','k','l'],
+                ['z','x','c','v','b','n','m']];
+    const kw=34*S, kkey_h=42*S, kgap=6*S, ky0=ky+10*S;
+    ctx.font=`${16*S}px system-ui,-apple-system,sans-serif`;
+    ctx.fillStyle='#fff'; ctx.textAlign='center';
+    for (let r=0; r<rows.length; r++) {
+      const row=rows[r], tw=row.length*(kw+kgap)-kgap;
+      const startX=(W-tw)/2;
+      for (let c=0; c<row.length; c++) {
+        const kx=startX+c*(kw+kgap), kky=ky0+r*(kkey_h+kgap);
+        _tvRR(ctx,kx,kky,kw,kkey_h,6*S,'#363638');
+        ctx.fillText(row[c].toUpperCase(),kx+kw/2,kky+kkey_h*0.68);
+      }
+    }
+  }
+}
+
+async function generateTypingVideo() {
+  const title = document.getElementById('tv-title').value.trim();
+  const showKbd = document.getElementById('tv-keyboard').checked;
+  const msgs = messages.filter(m => m.type!=='batch_break' && m.type!=='batch_meme' && m.text);
+  if (!msgs.length) { alert('Add messages in the builder first'); return; }
+
+  const btn=document.getElementById('tv-gen-btn'), status=document.getElementById('tv-status');
+  btn.disabled=true; btn.textContent='Recording…';
+  status.style.display='block'; status.textContent='Setting up…';
+
+  const W=1080, H=1920, FPS=30;
+  const canvas=document.createElement('canvas');
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+
+  // Use DM builder's right bubble color
+  const rightColor = document.getElementById('c-r1')?.value || '#7c5cbf';
+
+  const mimeTypes=['video/mp4;codecs=avc1.42E01E','video/mp4','video/webm;codecs=vp9','video/webm'];
+  const mimeType=mimeTypes.find(mt=>{try{return MediaRecorder.isTypeSupported(mt);}catch(e){return false;}})||'video/webm';
+  const ext=mimeType.startsWith('video/mp4')?'mp4':'webm';
+
+  const stream=canvas.captureStream(FPS);
+  const recorder=new MediaRecorder(stream,{mimeType,videoBitsPerSecond:10_000_000});
+  const chunks=[];
+  recorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+
+  recorder.onstop=()=>{
+    const blob=new Blob(chunks,{type:mimeType});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=`ig-typing-video.${ext}`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),3000);
+    btn.disabled=false; btn.textContent='🎬 Generate Video';
+    status.style.display='none';
+    closeTypingVideoModal();
+  };
+
+  const visible=[];
+  _tvFrame(ctx,W,H,visible,{show:false},title,showKbd,rightColor);
+  recorder.start();
+  await new Promise(r=>setTimeout(r,400));
+
+  for (let i=0; i<msgs.length; i++) {
+    status.textContent=`Message ${i+1} / ${msgs.length}…`;
+    // Typing animation
+    await new Promise(resolve=>{
+      const start=Date.now(); let raf;
+      function tick(){
+        const ms=Date.now()-start;
+        _tvFrame(ctx,W,H,visible,{show:true,side:msgs[i].side,phase:(ms/1000)*280},title,showKbd,rightColor);
+        if(ms<_tvSpeed*1000){raf=requestAnimationFrame(tick);}
+        else{cancelAnimationFrame(raf);resolve();}
+      }
+      tick();
+    });
+    // Reveal message
+    visible.push(msgs[i]);
+    _tvFrame(ctx,W,H,visible,{show:false},title,showKbd,rightColor);
+    await new Promise(r=>setTimeout(r,_tvPause*1000));
+  }
+
+  await new Promise(r=>setTimeout(r,1200));
+  recorder.stop();
+}
 </script>
+
+<!-- TYPING VIDEO MODAL -->
+<div id="typing-video-modal">
+  <div class="tv-box">
+    <div class="tv-heading">📱 Typing Video</div>
+    <div class="tv-sub">Creates a video of your conversation appearing message by message with typing animation</div>
+
+    <div>
+      <div class="tv-lbl">Caption (optional)</div>
+      <input class="tv-input" id="tv-title" placeholder='e.g. "My rizz 💀" or "His loyalty test"' maxlength="60">
+    </div>
+
+    <div>
+      <div class="tv-lbl">Typing speed</div>
+      <div class="tv-btns">
+        <button class="tv-btn" data-speed="3" onclick="tvSetSpeed(3)">Slow</button>
+        <button class="tv-btn on" data-speed="2" onclick="tvSetSpeed(2)">Medium</button>
+        <button class="tv-btn" data-speed="1" onclick="tvSetSpeed(1)">Fast</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="tv-lbl">Pause after each message</div>
+      <div class="tv-btns">
+        <button class="tv-btn" data-pause="0.5" onclick="tvSetPause(0.5)">Short</button>
+        <button class="tv-btn on" data-pause="1" onclick="tvSetPause(1)">Normal</button>
+        <button class="tv-btn" data-pause="2" onclick="tvSetPause(2)">Long</button>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="tv-keyboard" style="accent-color:#10b981;width:14px;height:14px">
+      <label for="tv-keyboard" style="font-size:11px;color:rgba(255,255,255,0.6);cursor:pointer">Show keyboard at bottom</label>
+    </div>
+
+    <div id="tv-status" class="tv-status"></div>
+    <button class="tv-gen" id="tv-gen-btn" onclick="generateTypingVideo()">🎬 Generate Video</button>
+    <button class="tv-cancel" onclick="closeTypingVideoModal()">Cancel</button>
+  </div>
+</div>
 
 <!-- RANGE PICKER MODAL -->
 <div id="range-modal">
