@@ -125,19 +125,21 @@ select option{background:#1a1a1e}
 .ig-story-side-av img{width:100%;height:100%;object-fit:cover}
 .ig-story-side-av svg{width:18px;height:18px;fill:#888}
 .ig-story-vline{width:2px;flex:1;background:rgba(255,255,255,0.2);border-radius:2px;min-height:20px}
-.ig-story-content{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+#ig-time-sep{text-align:center;font-size:13px;color:rgba(255,255,255,0.5);padding:10px 0 6px;display:none;letter-spacing:.1px}
+#capture-root.light-mode #ig-time-sep{color:rgba(0,0,0,0.45)}
+.ig-story-content{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
 .ig-story-block.right .ig-story-content{align-items:flex-end}
-.ig-replied-label{font-size:14px;color:rgba(255,255,255,0.5);font-weight:400}
-.ig-story-img-wrap{width:155px;border-radius:12px;overflow:hidden;background:#1c1c1c}
+.ig-replied-label{font-size:13px;color:rgba(255,255,255,0.45);font-weight:400}
+.ig-story-img-wrap{width:135px;border-radius:10px;overflow:hidden;background:#1c1c1c}
 .ig-story-img-wrap img{width:100%;display:block;object-fit:cover}
 
 /* MESSAGES */
-.ig-messages{padding:2px 12px 16px;display:flex;flex-direction:column;gap:4px}
-.ig-row{display:flex;align-items:flex-end;gap:7px;min-width:0}
+.ig-messages{padding:2px 8px 16px;display:flex;flex-direction:column;gap:0}
+.ig-row{display:flex;align-items:flex-end;gap:6px;min-width:0}
 .ig-row.right{justify-content:flex-end}
 .ig-row.left{justify-content:flex-start}
-.ig-bubble{border-radius:22px;padding:12px 16px;min-width:0;word-break:break-word;overflow-wrap:anywhere}
-.ig-bubble-txt{font-size:16px;color:#fff;line-height:1.4;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
+.ig-bubble{border-radius:22px;padding:8px 13px;min-width:0;word-break:break-word;overflow-wrap:anywhere}.ig-row.right .ig-bubble{padding:8px 15px}
+.ig-bubble-txt{font-size:19px;color:#fff;line-height:1.25;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
 .ig-bubble-txt.bold{font-weight:700}
 /* Light-mode preview: flip text on light backgrounds (right purple bubble keeps white) */
 #capture-root.light-mode .ig-row:not(.right) .ig-bubble-txt,
@@ -153,9 +155,9 @@ select option{background:#1a1a1e}
 .ig-viewonce-txt{font-size:16px;color:#fff;font-weight:700}
 
 /* REACTION — always bottom-left of the bubble */
-.ig-bbl-wrap{position:relative;display:inline-block;max-width:74%}
+.ig-bbl-wrap{position:relative;display:inline-block;max-width:84%}
 .ig-bbl-wrap.has-react{margin-bottom:22px}
-.ig-reaction{position:absolute;bottom:-13px;left:6px;display:inline-flex;align-items:center;justify-content:center;padding:3px 7px;border-radius:100px;background:#161616;border:2.5px solid #000;font-size:10px;line-height:1;overflow:visible;z-index:2;white-space:nowrap}
+.ig-reaction{position:absolute;bottom:-14px;left:6px;display:inline-flex;align-items:center;justify-content:center;padding:4px 8px;border-radius:100px;background:#161616;border:2.5px solid #000;font-size:12px;line-height:1;overflow:visible;z-index:2;white-space:nowrap}
 
 /* SEEN */
 .ig-seen{font-size:12px;color:rgba(255,255,255,0.45);text-align:right;padding:4px 16px 10px;}
@@ -167,8 +169,8 @@ select option{background:#1a1a1e}
 .loading-progress{font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px}
 
 /* Twemoji */
-img.emoji{height:1em;width:1em;margin:0 .03em 0 .05em;vertical-align:-0.1em;display:inline}
-.ig-reaction img.emoji{height:1.4em;width:1.4em;vertical-align:middle;margin:0}
+img.emoji{height:1.12em;width:1.12em;margin:0 .04em 0 .06em;vertical-align:-0.18em;display:inline}
+.ig-reaction img.emoji{height:1.38em;width:1.38em;vertical-align:middle;margin:0}
 
 /* ── RANGE PICKER MODAL ── */
 #range-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:200;align-items:center;justify-content:center}
@@ -811,6 +813,7 @@ button,input,select,textarea{transition-property:background,border-color,color,b
 
       <div id="capture-root">
         <div id="ig-story-hdr"></div>
+        <div id="ig-time-sep"></div>
         <div class="ig-messages" id="ig-msgs"></div>
       </div>
     </div>
@@ -843,6 +846,8 @@ function _emojiSrc(icon) {
       || EMOJI_PACK[char + '️']
       || false;
 }
+
+function fmtTime(d){let h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return`${h}:${String(m).padStart(2,'0')} ${ap}`}
 
 let storyPos = 'left';
 let storySrc = null;
@@ -1139,6 +1144,10 @@ function render() {
   const _h=bg.replace('#','');
   const _r=parseInt(_h.substring(0,2),16), _g=parseInt(_h.substring(2,4),16), _b=parseInt(_h.substring(4,6),16);
   document.getElementById('capture-root').classList.toggle('light-mode', (0.299*_r+0.587*_g+0.114*_b) > 160);
+
+  // TIME
+  const ts=document.getElementById('ig-time-sep');
+  ts.textContent=fmtTime(new Date()); ts.style.display='block';
 
   // STORY
   const sh=document.getElementById('ig-story-hdr');
