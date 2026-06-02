@@ -1281,11 +1281,17 @@ function render() {
     container.appendChild(seenDiv);
   }
 
-  // Apply Twemoji
+  // Apply Twemoji then upgrade to Apple emoji pack
   if (typeof twemoji !== 'undefined') {
     twemoji.parse(document.getElementById('capture-root'), {
       folder:'svg', ext:'.svg',
       base:'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/'
+    });
+  }
+  if (typeof EMOJI_PACK !== 'undefined') {
+    document.getElementById('capture-root').querySelectorAll('img.emoji').forEach(img => {
+      const src = _lookupEmoji(img.alt);
+      if (src) img.src = src;
     });
   }
 }
