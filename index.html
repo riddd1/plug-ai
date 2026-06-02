@@ -597,20 +597,14 @@ button,input,select,textarea{transition-property:background,border-color,color,b
       <div class="logo-sub">IG DM Creator</div>
     </div>
   </div>
-  <div class="topbar-tabs">
-    <button class="t-tab active" id="tab-builder" onclick="switchTab('builder')">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Builder
-    </button>
-    <button class="t-tab" id="tab-code" onclick="switchTab('code')">
-      <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      Script
-    </button>
-  </div>
 </div>
 
 <div class="main">
   <div class="lp">
+    <div style="display:flex;background:rgba(255,255,255,0.04);border-radius:8px;padding:3px;gap:2px;margin-bottom:8px;flex-shrink:0">
+      <button id="toggle-builder" onclick="switchTab('builder')" style="flex:1;padding:6px 10px;font-size:11px;font-weight:700;border-radius:6px;border:none;cursor:pointer;background:rgba(232,168,124,0.18);color:#e8a87c;transition:all .15s;font-family:inherit">Builder</button>
+      <button id="toggle-scripts" onclick="switchTab('code')" style="flex:1;padding:6px 10px;font-size:11px;font-weight:700;border-radius:6px;border:none;cursor:pointer;background:none;color:rgba(255,255,255,0.4);transition:all .15s;font-family:inherit">Scripts</button>
+    </div>
     <div id="builder-panel">
 
       <div>
@@ -706,6 +700,16 @@ button,input,select,textarea{transition-property:background,border-color,color,b
         </div>
       </div>
 
+
+      <!-- AI GENERATE IN BUILDER -->
+      <div style="display:flex;flex-direction:column;gap:5px;margin-top:6px">
+        <div style="height:1px;background:rgba(255,255,255,0.07)"></div>
+        <div style="display:flex;gap:4px">
+          <button class="abtn" id="gen-slide-btn-b" onclick="selectScriptType('slide')" style="flex:1;justify-content:center;background:rgba(232,168,124,0.12);border-color:rgba(232,168,124,0.4);color:#e8a87c;padding:5px">Slide Scripts</button>
+          <button class="abtn" id="gen-typing-btn-b" onclick="selectScriptType('typing')" style="flex:1;justify-content:center;padding:5px">Typing Scripts</button>
+        </div>
+        <button class="gbtn" onclick="generateAIScript()" style="padding:9px;font-size:11px">✨ Generate Script</button>
+      </div>
     </div>
 
     <!-- CODE MODE -->
@@ -734,6 +738,2037 @@ button,input,select,textarea{transition-property:background,border-color,color,b
       <button class="gbtn" id="ai-gen-btn" onclick="generateAIScript()" style="padding:9px;font-size:11px">✨ Generate Script</button>
       <div id="ai-gen-status" style="display:none;font-size:10px;color:rgba(255,255,255,0.4);text-align:center;padding:2px 0"></div>
     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="bottom-btns">
+      <button class="gbtn" onclick="copyHTML()" id="copy-html-btn">
+        <svg viewBox="0 0 24 24"><rect x="9" y="2" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Preview HTML
+      </button>
+      <button class="gbtn sec" onclick="openRangePicker()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PNG
+      </button>
+      <button class="gbtn sec" onclick="openSlideshowModal()">
+        <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        Create Slideshow
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT / PREVIEW -->
+  <div class="rp">
+    <div class="preview-hdr">
+      <span class="pvbadge">
+        <svg viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        Live Preview
+      </span>
+    </div>
+    <div class="preview-area" id="preview-area">
+      <!-- crop overlay -->
+      <div id="crop-overlay">
+        <div class="crop-outside" id="co-top"></div>
+        <div class="crop-outside" id="co-bottom"></div>
+        <div class="crop-outside" id="co-left"></div>
+        <div class="crop-outside" id="co-right"></div>
+        <div id="crop-selection"></div>
+      </div>
+      <button id="crop-confirm" onclick="confirmCrop()">✓ Download</button>
+      <button id="crop-cancel" onclick="cancelCrop()">Cancel</button>
+
+      <div id="capture-root">
+        <div id="ig-time-sep"></div>
+        <div id="ig-story-hdr"></div>
+        <div class="ig-messages" id="ig-msgs"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p class="loading-text">Generating...</p>
+  <p class="loading-progress" id="loading-progress"></p>
+</div>
+
+<input type="file" id="avatar-file" accept="image/*" style="display:none" onchange="handleAvatar(event)">
+<input type="file" id="story-file" accept="image/*" style="display:none" onchange="handleStory(event)">
+<input type="file" id="msg-file" accept="image/*" style="display:none" onchange="handleMsgImg(event)">
+<input type="file" id="meme-file-input" accept="image/*" style="display:none" onchange="handleMemeFile(event)">
+<input type="file" id="audio-file-input" accept="audio/*" style="display:none" onchange="handleAudioFile(event)">
+<input type="file" id="stash-meme-file" accept="image/*" multiple style="display:none" onchange="handleStashMeme(event)">
+<input type="file" id="stash-audio-file" accept="audio/*" style="display:none" onchange="handleStashAudio(event)">
+<input type="file" id="stash-audio-unlock-input" accept="audio/*" multiple style="display:none" onchange="handleAudioUnlockFiles(event)">
+
+<script>
+// ── EMOJI PACK ──
+// Twemoji callback: converts hex icon to char, returns Apple PNG data-URL
+function _emojiSrc(icon) {
+  if (typeof EMOJI_PACK === 'undefined') return false;
+  const char = icon.split('-').map(c => String.fromCodePoint(parseInt(c, 16))).join('');
+  return EMOJI_PACK[char]
+      || EMOJI_PACK[char.replace(/️/g, '')]
+      || EMOJI_PACK[char + '️']
+      || false;
+}
+
+function fmtTime(d){let h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return`${h}:${String(m).padStart(2,'0')} ${ap}`}
+
+let storyPos = 'left';
+let storySrc = null;
+let avatarSrc = null;
+let pendingMsgIdx = -1;
+let messages = [];
+let suppressCodeSync = false;
+let suppressBuilderSync = false;
+
+// ── TAB ──
+function switchTab(tab) {
+  document.body.dataset.tab = tab;
+  document.getElementById('builder-panel').style.display = tab==='builder' ? 'block' : 'none';
+  document.getElementById('code-panel').style.display = tab==='code' ? 'flex' : 'none';
+  const tb = document.getElementById('toggle-builder');
+  const ts = document.getElementById('toggle-scripts');
+  if (tb) {
+    tb.style.background = tab==='builder' ? 'rgba(232,168,124,0.18)' : 'none';
+    tb.style.color = tab==='builder' ? '#e8a87c' : 'rgba(255,255,255,0.4)';
+    ts.style.background = tab==='code' ? 'rgba(232,168,124,0.18)' : 'none';
+    ts.style.color = tab==='code' ? '#e8a87c' : 'rgba(255,255,255,0.4)';
+  }
+  if (tab === 'code') syncBuilderToCode();
+}
+
+// Honor URL hash (e.g. #code, #stash) so links from scriptmaker.html land correctly.
+(function applyHashTab(){
+  const h = (location.hash || '').slice(1);
+  if (h === 'builder' || h === 'code' || h === 'stash') switchTab(h);
+  else document.body.dataset.tab = 'builder';
+})();
+
+// ── FILES ──
+function handleAvatar(e) {
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{ avatarSrc=ev.target.result; document.getElementById('avatar-thumb').innerHTML=`<img src="${avatarSrc}">`; render(); };
+  r.readAsDataURL(f); e.target.value='';
+}
+function handleStory(e) {
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{ storySrc=ev.target.result; document.getElementById('story-thumb').innerHTML=`<img src="${storySrc}">`; render(); syncBuilderToCode(); };
+  r.readAsDataURL(f); e.target.value='';
+}
+function clearStory() { storySrc=null; document.getElementById('story-thumb').innerHTML='🖼'; render(); syncBuilderToCode(); }
+function setStoryPos(p) {
+  storyPos=p;
+  document.getElementById('pos-left').classList.toggle('active',p==='left');
+  document.getElementById('pos-right').classList.toggle('active',p==='right');
+  render(); syncBuilderToCode();
+}
+function handleMsgImg(e) {
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{ if(pendingMsgIdx>=0){messages[pendingMsgIdx].img=ev.target.result; renderMsgList(); render(); syncBuilderToCode(); pendingMsgIdx=-1;} };
+  r.readAsDataURL(f); e.target.value='';
+}
+
+// ── HELPERS ──
+function syncHex(inputId, spanId) {
+  document.getElementById(spanId).textContent = document.getElementById(inputId).value.toUpperCase();
+}
+
+// ── THEME PRESETS ──
+const THEME_PRESETS = {
+  'dark-grad':   { mode:'gradient', r1:'#7a4ff3', r2:'#556bef', l:'#262626', bg:'#0c1014' },
+  'dark-solid':  { mode:'solid',    r1:'#8b5cf6', r2:'#8b5cf6', l:'#262626', bg:'#0c1014' },
+  'light-grad':  { mode:'gradient', r1:'#7a4ff3', r2:'#556bef', l:'#efefef', bg:'#ffffff' },
+  'light-solid': { mode:'solid',    r1:'#8b5cf6', r2:'#8b5cf6', l:'#efefef', bg:'#ffffff' }
+};
+
+function applyTheme(preset) {
+  document.querySelectorAll('.tpreset').forEach(b => b.classList.toggle('active', b.dataset.preset === preset));
+  if (preset === 'custom') return;
+  const t = THEME_PRESETS[preset];
+  if (!t) return;
+  document.querySelector(`input[name="cmode"][value="${t.mode}"]`).checked = true;
+  document.getElementById('c-r1').value = t.r1;
+  document.getElementById('c-r2').value = t.r2;
+  document.getElementById('c-l').value  = t.l;
+  document.getElementById('c-bg').value = t.bg;
+  syncHex('c-r1','h-r1'); syncHex('c-r2','h-r2');
+  syncHex('c-l','h-l');   syncHex('c-bg','h-bg');
+  render();
+}
+
+function markCustomTheme() {
+  document.querySelectorAll('.tpreset').forEach(b => b.classList.toggle('active', b.dataset.preset === 'custom'));
+}
+function getRightStyle() {
+  const grad=document.querySelector('input[name="cmode"]:checked').value==='gradient';
+  const c1=document.getElementById('c-r1').value, c2=document.getElementById('c-r2').value;
+  return grad ? `background:linear-gradient(135deg,${c1},${c2})` : `background:${c1}`;
+}
+function hexToRgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}
+function lerpColor(h1,h2,t){const[r1,g1,b1]=hexToRgb(h1),[r2,g2,b2]=hexToRgb(h2);return`rgb(${Math.round(r1+(r2-r1)*t)},${Math.round(g1+(g2-g1)*t)},${Math.round(b1+(b2-b1)*t)})`}
+
+// ── BUILDER → CODE SYNC ──
+function syncBuilderToCode() {
+  if (suppressBuilderSync) return;
+  suppressCodeSync = true;
+  const lines = [];
+  if (storySrc) lines.push(`${storyPos==='right'?'2':'1'}) STORY_REPLY:`);
+  messages.forEach(m => {
+    if (m.type==='batch_break') { lines.push('-b-'); return; }
+    if (m.type==='batch_meme') { lines.push('-m-'); if (m.caption) lines.push(`Caption: "${m.caption}"`); return; }
+    const n = m.side==='right' ? '2' : '1';
+    if (m.type==='image') lines.push(`${n}) IMAGE:`);
+    else if (m.type==='viewonce') lines.push(`${n}) VIEWONCE:`);
+    else lines.push(`${n}) ${m.text||''}`);
+    if (m.reaction) lines.push(`REACT:${m.reaction}`);
+  });
+  const seenChk = document.getElementById('seen-chk');
+  const seenTxt = document.getElementById('seen-text');
+  if (seenChk && seenChk.checked && seenTxt && seenTxt.value.trim()) {
+    lines.push(`SEEN:${seenTxt.value.trim()}`);
+  }
+  document.getElementById('code-ta').value = lines.join('\n');
+  document.getElementById('char-cnt').textContent = `${lines.join('\n').length}/1500 characters`;
+  suppressCodeSync = false;
+}
+
+// ── CODE → BUILDER SYNC ──
+function parseCode() {
+  if (suppressCodeSync) return;
+  suppressBuilderSync = true;
+  const raw = document.getElementById('code-ta').value;
+  document.getElementById('char-cnt').textContent = `${raw.length}/1500 characters`;
+  messages = [];
+  let foundStory = false;
+  let seenText = null;
+
+  const codeLines = raw.split('\n').filter(l=>l.trim());
+  for (let li = 0; li < codeLines.length; li++) {
+    const trimmed = codeLines[li].trim();
+
+    // SEEN line
+    if (/^SEEN:/i.test(trimmed)) {
+      seenText = trimmed.replace(/^SEEN:/i, '').trim();
+      continue;
+    }
+
+    // BATCH break
+    if (/^-b-$/i.test(trimmed) || /^---BATCH---$/i.test(trimmed) || /^BATCH$/i.test(trimmed)) {
+      messages.push({side:'none', type:'batch_break', text:'', img:null, reaction:null});
+      continue;
+    }
+
+    // MEME slide — peek ahead for Caption: "text"
+    if (/^-m-$/i.test(trimmed)) {
+      const meme = {side:'none', type:'batch_meme', text:'', img:null, reaction:null, caption:''};
+      messages.push(meme);
+      const nextLine = li + 1 < codeLines.length ? codeLines[li+1].trim() : '';
+      const capM = nextLine.match(/^Caption:\s*"([^"]*)"/i) || nextLine.match(/^Caption:\s*(.+)/i);
+      if (capM) { meme.caption = capM[1]; li++; }
+      continue;
+    }
+
+    // REACT line — attaches to previous message
+    if (/^REACT:/i.test(trimmed)) {
+      const emoji = trimmed.replace(/^REACT:/i, '').trim();
+      if (messages.length > 0) messages[messages.length-1].reaction = emoji;
+      continue;
+    }
+
+    const match = trimmed.match(/^([12])\)\s*(.*)$/);
+    if (!match) continue;
+    const side = match[1]==='2' ? 'right' : 'left';
+    const rest = match[2].trim();
+    const upper = rest.toUpperCase();
+
+    if (upper.startsWith('STORY_REPLY:')) {
+      foundStory = true;
+      storyPos = side==='right' ? 'right' : 'left';
+      document.getElementById('pos-left').classList.toggle('active', storyPos==='left');
+      document.getElementById('pos-right').classList.toggle('active', storyPos==='right');
+    } else if (upper.startsWith('IMAGE:')) {
+      messages.push({side, type:'image', text:'', img:null, reaction:null});
+    } else if (upper.startsWith('VIEWONCE:')) {
+      messages.push({side, type:'viewonce', text:'', img:null, reaction:null});
+    } else {
+      messages.push({side, type:'text', text:rest, img:null, reaction:null});
+    }
+  }
+
+  // sync seen
+  if (seenText !== null) {
+    document.getElementById('seen-chk').checked = true;
+    document.getElementById('seen-text').value = seenText;
+  } else {
+    document.getElementById('seen-chk').checked = false;
+  }
+
+  if (!foundStory && !storySrc) { /* keep */ }
+  renderMsgList(); render();
+  suppressBuilderSync = false;
+}
+
+// ── MSG LIST ──
+function renderMsgList() {
+  const list=document.getElementById('msg-list');
+  list.innerHTML='';
+  messages.forEach((m,i) => {
+    if (m.type==='batch_break') {
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:6px;margin:4px 0';
+      row.innerHTML=`<div style="flex:1;height:1px;background:rgba(232,168,124,0.3)"></div><span style="font-size:9px;color:rgba(232,168,124,0.7);font-weight:700;white-space:nowrap">-b-</span><div style="flex:1;height:1px;background:rgba(232,168,124,0.3)"></div><button class="delbtn" onclick="messages.splice(${i},1);renderMsgList();render();syncBuilderToCode()">✕</button>`;
+      list.appendChild(row);
+      return;
+    }
+    if (m.type==='batch_meme') {
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:6px;margin:4px 0';
+      const imgPart = m.img
+        ? `<img src="${m.img}" style="width:28px;height:22px;border-radius:3px;object-fit:cover;flex-shrink:0"><button onclick="messages[${i}].img=null;renderMsgList();render();syncBuilderToCode()" style="background:#E1306C;color:#fff;border:none;border-radius:50%;width:12px;height:12px;font-size:7px;cursor:pointer;line-height:1;flex-shrink:0">✕</button>`
+        : `<button class="abtn" style="font-size:9px;padding:2px 6px;flex-shrink:0" onclick="showMemeSourcePicker(${i})">+ img</button>`;
+      row.innerHTML=`<div style="flex:1;height:1px;background:rgba(139,92,246,0.35)"></div><span style="font-size:9px;color:#c4b5fd;font-weight:700;white-space:nowrap">-m-</span>${imgPart}<div style="flex:1;height:1px;background:rgba(139,92,246,0.35)"></div><button class="delbtn" onclick="messages.splice(${i},1);renderMsgList();render();syncBuilderToCode()">✕</button>`;
+      list.appendChild(row);
+      return;
+    }
+    const row=document.createElement('div');
+    row.className='msg-row';
+
+    let imgHtml='';
+    if (m.type==='image') {
+      imgHtml = m.img
+        ? `<div style="margin-top:3px;position:relative;display:inline-block">
+            <img src="${m.img}" style="width:44px;height:36px;border-radius:4px;object-fit:cover;display:block">
+            <button onclick="messages[${i}].img=null;renderMsgList();render();syncBuilderToCode()" style="position:absolute;top:-3px;right:-3px;background:#E1306C;color:#fff;border:none;border-radius:50%;width:12px;height:12px;font-size:7px;cursor:pointer;line-height:1">✕</button>
+           </div>`
+        : `<button class="abtn" style="margin-top:3px;font-size:9px;padding:2px 6px" onclick="pendingMsgIdx=${i};document.getElementById('msg-file').click()">+ upload img</button>`;
+    }
+
+    const isViewonce = m.type === 'viewonce';
+    const typeOptions = `
+      <option value="text" ${m.type==='text'?'selected':''}>Text</option>
+      <option value="image" ${m.type==='image'?'selected':''}>Image</option>
+      <option value="viewonce" ${m.type==='viewonce'?'selected':''}>① Photo</option>
+    `;
+
+    const reactVal = (m.reaction||'').replace(/"/g,'&quot;');
+
+    row.innerHTML=`
+      <div class="msg-inner">
+        <span class="mnum">${i+1}</span>
+        <select onchange="messages[${i}].side=this.value;renderMsgList();render();syncBuilderToCode()">
+          <option value="left" ${m.side==='left'?'selected':''}>Left</option>
+          <option value="right" ${m.side==='right'?'selected':''}>Right</option>
+        </select>
+        <select onchange="messages[${i}].type=this.value;renderMsgList();render();syncBuilderToCode()">${typeOptions}</select>
+        <input class="minput" value="${(m.text||'').replace(/"/g,'&quot;')}"
+          oninput="messages[${i}].text=this.value;render();syncBuilderToCode()"
+          ${m.type!=='text'?'disabled style="opacity:.3"':''}
+          placeholder="Message...">
+        <button class="delbtn" onclick="messages.splice(${i},1);renderMsgList();render();syncBuilderToCode()">✕</button>
+      </div>
+      <div class="react-row">
+        <span class="react-lbl">React:</span>
+        <input class="react-input" value="${reactVal}"
+          oninput="messages[${i}].reaction=this.value.trim()||null;render();syncBuilderToCode()"
+          placeholder="😤">
+      </div>
+      ${imgHtml}`;
+    list.appendChild(row);
+  });
+}
+
+function addMsg(side, type) {
+  messages.push({side, type, text:'', img:null, reaction:null});
+  renderMsgList(); render(); syncBuilderToCode();
+}
+function addBatchBreak() {
+  messages.push({side:'none', type:'batch_break', text:'', img:null, reaction:null});
+  renderMsgList(); render(); syncBuilderToCode();
+}
+function addBatchMeme() {
+  messages.push({side:'none', type:'batch_meme', text:'', img:null, reaction:null});
+  renderMsgList(); render(); syncBuilderToCode();
+}
+function clearMsgs() { messages=[]; renderMsgList(); render(); syncBuilderToCode(); }
+
+// ── RENDER ──
+function render() {
+  const isGrad=document.querySelector('input[name="cmode"]:checked').value==='gradient';
+  document.getElementById('grad-row').style.display=isGrad?'flex':'none';
+  const bg=document.getElementById('c-bg').value;
+  const lc=document.getElementById('c-l').value;
+  const c1=document.getElementById('c-r1').value, c2=document.getElementById('c-r2').value;
+  const bold=document.getElementById('bold-chk').checked;
+
+  // Count right-side messages for cross-conversation gradient
+  const totalRight=messages.filter(m=>m.side==='right'&&m.type!=='batch_break'&&m.type!=='batch_meme').length;
+  let rightIdx=0;
+  let firstMsg=true;
+
+  document.getElementById('capture-root').style.background=bg;
+  // Toggle light-mode class based on background luminance
+  const _h=bg.replace('#','');
+  const _r=parseInt(_h.substring(0,2),16), _g=parseInt(_h.substring(2,4),16), _b=parseInt(_h.substring(4,6),16);
+  document.getElementById('capture-root').classList.toggle('light-mode', (0.299*_r+0.587*_g+0.114*_b) > 160);
+
+  // TIME
+  const ts=document.getElementById('ig-time-sep');
+  ts.textContent=fmtTime(new Date()); ts.style.display='block';
+
+  // STORY
+  const sh=document.getElementById('ig-story-hdr');
+  if (storySrc) {
+    sh.innerHTML=''; sh.style.display='block';
+    const block=document.createElement('div');
+    block.className='ig-story-block'+(storyPos==='right'?' right':'');
+
+    const sideCol=document.createElement('div');
+    sideCol.className='ig-story-side';
+    const vline=document.createElement('div'); vline.className='ig-story-vline';
+    sideCol.appendChild(vline);
+
+    const content=document.createElement('div'); content.className='ig-story-content';
+
+    const lbl=document.createElement('div'); lbl.className='ig-replied-label';
+    const defaultLeft='Replied to your story', defaultRight='You replied to their story';
+    const cur=document.getElementById('replied-label').value.trim();
+    let lblText=(cur===defaultLeft||cur===defaultRight||!cur)
+      ? (storyPos==='right'?defaultRight:defaultLeft) : cur;
+    document.getElementById('replied-label').value=lblText;
+    lbl.textContent=lblText;
+    content.appendChild(lbl);
+
+    const imgWrap=document.createElement('div'); imgWrap.className='ig-story-img-wrap';
+    const sImg=document.createElement('img'); sImg.src=storySrc;
+    imgWrap.appendChild(sImg); content.appendChild(imgWrap);
+
+    block.appendChild(sideCol); block.appendChild(content);
+    sh.appendChild(block);
+  } else { sh.style.display='none'; sh.innerHTML=''; }
+
+  // MESSAGES
+  const container=document.getElementById('ig-msgs');
+  container.innerHTML='';
+  container.style.paddingTop=storySrc?'2px':'4px';
+
+  messages.forEach((m,i)=>{
+    if (m.type==='batch_break'||m.type==='batch_meme') return;
+    const prevSame=i>0&&messages[i-1].type!=='batch_break'&&messages[i-1].type!=='batch_meme'&&messages[i-1].side===m.side;
+    const nextSame=i<messages.length-1&&messages[i+1].type!=='batch_break'&&messages[i+1].type!=='batch_meme'&&messages[i+1].side===m.side;
+    const isFirst=!prevSame, isLast=!nextSame;
+
+    // Per-bubble right color: interpolate c1→c2 across all right messages
+    let rs;
+    if (m.side==='right') {
+      const t=totalRight>1?rightIdx/(totalRight-1):0;
+      rs=`background:${isGrad?lerpColor(c1,c2,t):c1}`;
+      rightIdx++;
+    }
+
+    const row=document.createElement('div');
+    row.className=`ig-row ${m.side}`;
+    row.style.marginTop = prevSame ? '2px' : (firstMsg&&storySrc ? '2px' : '10px');
+    firstMsg=false;
+
+    // Wrapper for reaction absolute positioning
+    const bblWrap=document.createElement('div');
+    const hasReact=m.reaction&&m.reaction.trim();
+    bblWrap.className='ig-bbl-wrap'+(hasReact?' has-react':'');
+
+    if (m.type==='image'&&m.img) {
+      const wrap=document.createElement('div'); wrap.className='ig-img-bubble';
+      const img=document.createElement('img'); img.src=m.img;
+      wrap.appendChild(img); bblWrap.appendChild(wrap);
+
+    } else if (m.type==='viewonce') {
+      const bbl=document.createElement('div'); bbl.className='ig-viewonce-bbl';
+      bbl.style.cssText=m.side==='right'?rs:`background:${lc}`;
+      let r;
+      if (m.side==='right') {
+        r=isFirst&&isLast?'22px 22px 4px 22px':isFirst?'22px 22px 4px 22px':isLast?'22px 4px 22px 22px':'22px 4px 4px 22px';
+      } else {
+        r=isFirst&&isLast?'22px 22px 22px 4px':isFirst?'22px 22px 22px 4px':isLast?'4px 22px 22px 22px':'4px 22px 22px 4px';
+      }
+      bbl.style.borderRadius=r;
+      const icon=document.createElement('div'); icon.className='ig-viewonce-icon';
+      icon.innerHTML=`<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8" stroke="#c4b2fd" stroke-width="1.8" stroke-dasharray="3.14 3.14" fill="none"/><text x="10" y="10" text-anchor="middle" dominant-baseline="central" fill="#c4b2fd" font-size="8" font-weight="700" font-family="-apple-system,BlinkMacSystemFont,sans-serif">1</text></svg>`;
+      const txt=document.createElement('div'); txt.className='ig-viewonce-txt'; txt.textContent='Photo';
+      txt.style.cssText='color:#c4b2fd;font-size:16px;font-weight:700';
+      bbl.appendChild(icon); bbl.appendChild(txt);
+      bblWrap.appendChild(bbl);
+
+    } else if (m.type==='image'&&!m.img) {
+      const bbl=document.createElement('div'); bbl.className='ig-bubble';
+      bbl.style.cssText=(m.side==='right'?rs:`background:${lc}`)+';opacity:0.4';
+      bbl.style.borderRadius='22px';
+      const txt=document.createElement('div'); txt.className='ig-bubble-txt'; txt.textContent='[Image]';
+      bbl.appendChild(txt); bblWrap.appendChild(bbl);
+
+    } else {
+      const bbl=document.createElement('div'); bbl.className='ig-bubble';
+      bbl.style.cssText=m.side==='right'?rs:`background:${lc}`;
+      let r;
+      if (m.side==='right') {
+        r=isFirst&&isLast?'22px 22px 4px 22px':isFirst?'22px 22px 4px 22px':isLast?'22px 4px 22px 22px':'22px 4px 4px 22px';
+      } else {
+        r=isFirst&&isLast?'22px 22px 22px 4px':isFirst?'22px 22px 22px 4px':isLast?'4px 22px 22px 22px':'4px 22px 22px 4px';
+      }
+      bbl.style.borderRadius=r;
+      const txt=document.createElement('div');
+      txt.className='ig-bubble-txt'+(bold?' bold':'');
+      txt.textContent=m.text;
+      bbl.appendChild(txt); bblWrap.appendChild(bbl);
+    }
+
+    // REACTION — absolutely overlapping bottom-left of bubble
+    if (hasReact) {
+      const reactEl=document.createElement('div');
+      reactEl.className='ig-reaction';
+      reactEl.textContent=m.reaction.trim();
+      bblWrap.appendChild(reactEl);
+    }
+
+    row.appendChild(bblWrap);
+    container.appendChild(row);
+  });
+
+  // SEEN TEXT
+  const seenChk = document.getElementById('seen-chk');
+  const seenTxtEl = document.getElementById('seen-text');
+  if (seenChk && seenChk.checked && seenTxtEl && seenTxtEl.value.trim()) {
+    const seenDiv=document.createElement('div');
+    seenDiv.className='ig-seen';
+    seenDiv.textContent=seenTxtEl.value.trim();
+    container.appendChild(seenDiv);
+  }
+
+  // Apply emoji — callback serves Apple PNG data-URLs from EMOJI_PACK
+  if (typeof twemoji !== 'undefined') {
+    twemoji.parse(document.getElementById('capture-root'), { callback: _emojiSrc });
+  }
+}
+
+// ── COPY ──
+// ── AI SCRIPT GENERATOR ──
+let _scriptType = 'slide';
+function selectScriptType(type) {
+  _scriptType = type;
+  const on = 'flex:1;justify-content:center;background:rgba(232,168,124,0.12);border-color:rgba(232,168,124,0.4);color:#e8a87c;padding:5px';
+  const off = 'flex:1;justify-content:center;padding:5px';
+  ['','b'].forEach(s => {
+    const slide = document.getElementById('gen-slide-btn'+(s?'-'+s:''));
+    const typing = document.getElementById('gen-typing-btn'+(s?'-'+s:''));
+    if (slide) slide.style.cssText = type==='slide' ? on : off;
+    if (typing) typing.style.cssText = type==='typing' ? on : off;
+  });
+}
+
+function _buildSlidePrompt() {
+  const hooks = ["test him pls he deleted his instagram search history 😐","test him pls his location is always off now 😐","test him pls he started caring about how he looks when he goes out alone 🙃","test him pls he gets defensive when i ask simple questions 😐","test him pls he came home with a hickey and said it was from a seatbelt 🙃","test him pls he has a contact saved as a man's name but the texts come in at 2am 😐","test him pls he started tilting his phone away when i walk past 🙃","test him pls he cleared his call log for the first time ever 😐","test him pls he goes out every other weekend and never says where 🙃","test him pls he has a second instagram i wasn't supposed to find 😐","test him pls he bought new cologne and hides it in his car 🙃","test him pls he started deleting his messages every night before bed 😐","test him pls his ring finger has a tan line and he says it's from a ring he lost 🙃"];
+  const hook = hooks[Math.floor(Math.random()*hooks.length)];
+  return `You are a viral social media script writer. You write fake Instagram DM loyalty test scripts where a girl (the tester) slides into a guy's DMs pretending to be a stranger, and through casual innocent conversation he slowly reveals he is cheating on or manipulating his girlfriend. Every script must feel completely real — written by a human, not AI. The audience must not be able to tell it was generated.
+
+Output ONLY the raw script. No stage directions. No brackets. No placeholder text like [mutual] or [name]. No commentary. No caption blocks at the end. No explanations. Just the script starting with **IMAGE 1**.
+
+EXACT FORMAT:
+**IMAGE 1**
+2) STORY_REPLY:
+1) ${hook}
+2) [her short casual reply]
+-b-
+**IMAGE 2**
+2) [her opening line]
+2) [her second line]
+1) [his reply]
+1) [his second line]
+-b-
+...continue...
+-b-
+-m-
+Caption: "his exact words" [emoji outside quotes]
+-b-
+...continue until kill line. End immediately after his kill line. Nothing after it.
+
+FORMAT RULES — never break these:
+- 6 to 10 images total. Never fewer than 6. Never more than 10.
+- Every image must have exactly 3 to 4 lines of dialogue. Never 2. Never 5. Never 6.
+- Every single line of dialogue must be SHORT. Maximum 8 words per line.
+- 1) = his lines (left gray bubble). 2) = her lines (right purple bubble)
+- -b- on its own line between every image every single time.
+- -m- then Caption: for memes — placed immediately after his most revealing line
+- 3 to 4 memes per script
+- Meme caption format exactly: Caption: "his exact words" emoji — emoji goes OUTSIDE the closing quote
+- Script ends immediately after his kill line. She does NOT respond after it. No seen text.
+- Natural conversation flow — not strict alternating 2)/1)/2)/1) every single line.
+
+CONTENT RULES:
+- She uses natural emojis throughout: 😏 👀 😭 😅 😇 💀 😐 🙃 etc
+- He uses casual lowercase texting: lmaoo, nah, ight, idk, wbu, fr, honestly, ngl, kinda, yeah, bet
+- HE brings up the girlfriend himself — she NEVER reveals she knows about a girlfriend BEFORE he mentions someone first.
+- She NEVER confronts him. Always stays curious, playful, casual, slightly flirty.
+- Every script must have a completely different hook, setting, scenario, manipulation style and kill line.
+
+THE KILL LINE:
+- One short line he drops completely casually, like it's nothing
+- So manipulative or revealing that the audience gasps even though he said it like nothing
+- Cut immediately after it. Nothing after. Script over.
+
+Story reply from her friend: "${hook}"
+
+Generate the script now. Start with **IMAGE 1**. Raw script only. Nothing else before or after it.`;
+}
+
+function _buildTypingPrompt() {
+  return `You are a viral social media script writer. Write fake Instagram DM loyalty test scripts. Output ONLY the raw script. No stage directions, no brackets, no commentary. Just the script.
+
+CRITICAL RULES:
+
+UNIQUENESS: Every script is its own world. Different man, different situation, different hook, different setting, different manipulation, different kill line, different everything.
+
+RHYTHM: Every line pulls the reader into the next. Each line drops a crumb, raises a question, or reveals something small. No filler.
+
+FORMAT:
+**IMAGE 1**
+2) STORY_REPLY:
+1) [Write the girlfriend's hook message to her friend. A varied test phrase + one specific suspicious thing she noticed. End with a single emoji 😐 🙃 🥺]
+2) [short punchy reaction — 1 to 3 words + 🫶]
+-b-
+**IMAGE 2**
+[her opener lines, each starting with 2)]
+[his response lines, each starting with 1)]
+-b-
+...and so on. End immediately after the kill line.
+
+FORMAT RULES:
+- EVERY single dialogue line MUST start with either 1) or 2). No exceptions.
+- No apostrophes ever. Write: hes / shes / doesnt / thats / im / ur / u / wouldnt / havent
+- No specific names for people. No specific city names. Keep everything universal.
+- 7 to 10 images total
+- 2 to 4 lines per image. Vary the count — never uniform
+- Every line SHORT. One thought. Max 8 words. Split longer thoughts across two lines.
+- Group his lines together, her lines together. Never strict 2)/1)/2)/1) alternation.
+- -b- on its own line between every image
+- Meme format: -m- then on the next line: Caption: "his exact words" emoji. ONE word in ALL CAPS. Max 5 words. Emoji after the closing quote, never inside it.
+- 3 to 4 memes total across the whole script. Mid-script only — never on the final image.
+- Script ends clean on his kill line. She does not respond after it.
+
+HIS CHARACTER:
+- Evasive, never explanatory. Drops crumbs, never the full picture.
+- Sounds like he is flirting and bragging — not confessing.
+- WRONG: "nobody gets hurt if nobody knows" — too direct
+- RIGHT: "depends" / "some things u just dont share" — short, vague, pulls her in
+
+HER CHARACTER:
+- Innocent and curious. Never interrogating.
+- Never references a girlfriend until AFTER he has mentioned someone himself.
+- Occasionally says "sir" alone on its own line when genuinely shocked.
+- Uses CAPS on one key word when reacting: "a SCHEDULE??" / "TWO years??"
+
+THE KILL LINE:
+- His final 1 to 3 lines. Casual. Devastating. Like it means nothing to him.
+- Always shows what SHE (the unaware partner) believes while completely clueless.
+- No meme. Hard cut after it.
+
+Output the raw script only. Start with **IMAGE 1**. No other text.`;
+}
+
+async function generateAIScript() {
+  const btn = document.getElementById('ai-gen-btn');
+  const status = document.getElementById('ai-gen-status');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = 'Generating...';
+  status.style.display = 'block';
+  status.textContent = 'Cooking up your script...';
+  try {
+    const prompt = _scriptType === 'slide' ? _buildSlidePrompt() : _buildTypingPrompt();
+    const resp = await fetch('/ai/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await resp.json();
+    const script = data.content?.[0]?.text || '';
+    if (!script) throw new Error('No script returned');
+    // Clean **IMAGE X** headers — not part of DM Studio format
+    const cleaned = script.replace(/\*\*IMAGE \d+\*\*\n?/g, '').trim();
+    const ta = document.getElementById('code-ta');
+    ta.value = cleaned;
+    parseCode();
+    switchTab('code');
+    status.textContent = '✓ Script generated!';
+    setTimeout(() => { status.style.display = 'none'; }, 2500);
+  } catch(e) {
+    status.textContent = '✗ ' + (e.message || 'Failed');
+    setTimeout(() => { status.style.display = 'none'; }, 3000);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
+function copyScript() {
+  navigator.clipboard.writeText(document.getElementById('code-ta').value).then(()=>{
+    const b=document.getElementById('copy-script-btn');
+    const orig=b.innerHTML; b.innerHTML='✓ Copied!'; setTimeout(()=>b.innerHTML=orig,2000);
+  });
+}
+function copyHTML() {
+  navigator.clipboard.writeText(document.getElementById('capture-root').outerHTML).then(()=>{
+    const b=document.getElementById('copy-html-btn');
+    const orig=b.innerHTML; b.innerHTML='✓ Copied!'; setTimeout(()=>b.innerHTML=orig,2000);
+  });
+}
+
+// ── CROP / DOWNLOAD ──
+let cropState = {active:false, dragging:false, x0:0, y0:0, x1:0, y1:0};
+
+function startCrop() {
+  cropState = {active:true, dragging:false, x0:0, y0:0, x1:0, y1:0};
+  const ov=document.getElementById('crop-overlay');
+  ov.classList.add('active');
+  document.getElementById('crop-selection').style.cssText='display:none';
+  document.getElementById('co-top').style.cssText='display:none';
+  document.getElementById('co-bottom').style.cssText='display:none';
+  document.getElementById('co-left').style.cssText='display:none';
+  document.getElementById('co-right').style.cssText='display:none';
+  document.getElementById('crop-confirm').style.display='none';
+  document.getElementById('crop-cancel').style.display='block';
+}
+
+function cancelCrop() {
+  document.getElementById('crop-overlay').classList.remove('active');
+  document.getElementById('crop-confirm').style.display='none';
+  document.getElementById('crop-cancel').style.display='none';
+  cropState.active=false;
+}
+
+const ov=document.getElementById('crop-overlay');
+ov.addEventListener('mousedown', e=>{
+  if (!cropState.active) return;
+  const r=ov.getBoundingClientRect();
+  cropState.dragging=true;
+  cropState.x0=e.clientX-r.left; cropState.y0=e.clientY-r.top;
+  cropState.x1=cropState.x0; cropState.y1=cropState.y0;
+  updateCropBox();
+});
+ov.addEventListener('mousemove', e=>{
+  if (!cropState.dragging) return;
+  const r=ov.getBoundingClientRect();
+  cropState.x1=e.clientX-r.left; cropState.y1=e.clientY-r.top;
+  updateCropBox();
+});
+ov.addEventListener('mouseup', e=>{
+  if (!cropState.dragging) return;
+  cropState.dragging=false;
+  const w=Math.abs(cropState.x1-cropState.x0), h=Math.abs(cropState.y1-cropState.y0);
+  if (w>10&&h>10) {
+    document.getElementById('crop-confirm').style.display='block';
+  }
+});
+
+function updateCropBox() {
+  const x=Math.min(cropState.x0,cropState.x1), y=Math.min(cropState.y0,cropState.y1);
+  const w=Math.abs(cropState.x1-cropState.x0), h=Math.abs(cropState.y1-cropState.y0);
+  const ov=document.getElementById('crop-overlay');
+  const ow=ov.offsetWidth, oh=ov.offsetHeight;
+  const sel=document.getElementById('crop-selection');
+  sel.style.cssText=`display:block;left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
+  document.getElementById('co-top').style.cssText=`display:block;left:0;top:0;width:100%;height:${y}px`;
+  document.getElementById('co-bottom').style.cssText=`display:block;left:0;top:${y+h}px;width:100%;height:${oh-y-h}px`;
+  document.getElementById('co-left').style.cssText=`display:block;left:0;top:${y}px;width:${x}px;height:${h}px`;
+  document.getElementById('co-right').style.cssText=`display:block;left:${x+w}px;top:${y}px;width:${ow-x-w}px;height:${h}px`;
+}
+
+function confirmCrop() {
+  cancelCrop();
+  const area=document.getElementById('preview-area');
+  const root=document.getElementById('capture-root');
+  const areaRect=area.getBoundingClientRect();
+  const rootRect=root.getBoundingClientRect();
+
+  const x=Math.min(cropState.x0,cropState.x1);
+  const y=Math.min(cropState.y0,cropState.y1);
+  const w=Math.abs(cropState.x1-cropState.x0);
+  const h=Math.abs(cropState.y1-cropState.y0);
+
+  const offX=rootRect.left-areaRect.left;
+  const offY=rootRect.top-areaRect.top;
+  const cropX=x-offX, cropY=y-offY;
+
+  document.getElementById('loading').classList.add('show');
+  html2canvas(root,{scale:3,useCORS:true,allowTaint:true,backgroundColor:null,logging:false})
+  .then(canvas=>{
+    const scale=3;
+    const out=document.createElement('canvas');
+    out.width=w*scale; out.height=h*scale;
+    const ctx=out.getContext('2d');
+    ctx.drawImage(canvas, cropX*scale, cropY*scale, w*scale, h*scale, 0, 0, w*scale, h*scale);
+    const a=document.createElement('a');
+    a.download='ig-dm-crop.png'; a.href=out.toDataURL('image/png'); a.click();
+    document.getElementById('loading').classList.remove('show');
+  }).catch(()=>{ document.getElementById('loading').classList.remove('show'); alert('Try Chrome.'); });
+}
+
+renderMsgList();
+render();
+
+// ── RANGE PICKER ──
+let rangeStart = -1, rangeEnd = -1;
+
+function openRangePicker() {
+  rangeStart = -1; rangeEnd = -1;
+  buildRangeList();
+  document.getElementById('range-modal').classList.add('show');
+}
+function closeRangePicker() {
+  document.getElementById('range-modal').classList.remove('show');
+}
+
+function buildRangeList() {
+  const list = document.getElementById('range-list');
+  list.innerHTML = '';
+
+  const items = [];
+  if (storySrc) items.push({id:'story', label:'Story reply header', side:'story', type:'story'});
+  messages.forEach((m, i) => {
+    items.push({
+      id: i,
+      label: m.type==='image' ? '[Image]' : m.type==='viewonce' ? '[① Photo]' : (m.text || '[empty]'),
+      side: m.side,
+      type: m.type
+    });
+  });
+
+  if (items.length === 0) {
+    list.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.3);padding:12px;text-align:center">No messages yet</div>';
+    return;
+  }
+
+  items.forEach((item, idx) => {
+    const el = document.createElement('div');
+    el.className = 'range-item';
+    el.dataset.idx = idx;
+
+    const sideClass = item.side === 'story' ? 'story' : item.side;
+    const sideLabel = item.side === 'story' ? 'STORY' : item.side.toUpperCase();
+    const typeTag = item.type === 'image' ? '<span class="ri-tag">IMG</span>'
+                  : item.type === 'viewonce' ? '<span class="ri-tag">① PHOTO</span>' : '';
+
+    el.innerHTML = `
+      <span class="ri-num">${idx+1}</span>
+      <span class="ri-side ${sideClass}">${sideLabel}</span>
+      <span class="ri-text">${item.label.replace(/</g,'&lt;').substring(0,60)}</span>
+      ${typeTag}
+    `;
+
+    el.addEventListener('click', () => {
+      if (rangeStart === -1 || (rangeStart !== -1 && rangeEnd !== -1)) {
+        rangeStart = idx; rangeEnd = -1;
+      } else if (idx < rangeStart) {
+        rangeStart = idx; rangeEnd = -1;
+      } else {
+        rangeEnd = idx;
+      }
+      updateRangeUI(items.length);
+    });
+
+    list.appendChild(el);
+  });
+
+  window._rangeItems = items;
+}
+
+function updateRangeUI(total) {
+  const items = document.querySelectorAll('.range-item');
+  items.forEach((el, idx) => {
+    el.classList.remove('start','end','in-range');
+    if (idx === rangeStart && idx === rangeEnd) el.classList.add('start','end');
+    else if (idx === rangeStart) el.classList.add('start');
+    else if (idx === rangeEnd) el.classList.add('end');
+    else if (rangeStart !== -1 && rangeEnd !== -1 && idx > rangeStart && idx < rangeEnd) el.classList.add('in-range');
+  });
+  const ready = rangeStart !== -1 && rangeEnd !== -1 && rangeEnd >= rangeStart;
+  document.getElementById('range-dl-btn').disabled = !ready;
+  if (rangeStart !== -1 && rangeEnd === -1) {
+    document.getElementById('range-dl-btn').disabled = false;
+  }
+}
+
+function getOffsetFromRoot(el, root) {
+  let top = 0, cur = el;
+  while (cur && cur !== root) { top += cur.offsetTop; cur = cur.offsetParent; }
+  return top;
+}
+
+function doRangeDownload() {
+  closeRangePicker();
+  const end = rangeEnd === -1 ? rangeStart : rangeEnd;
+  const s = Math.min(rangeStart, end), e = Math.max(rangeStart, end);
+
+  const root = document.getElementById('capture-root');
+  const storyHdr = document.getElementById('ig-story-hdr');
+  const msgRows = Array.from(document.querySelectorAll('#ig-msgs > *'));
+
+  let domEls = [];
+  if (storySrc) domEls.push(storyHdr);
+  msgRows.forEach(el => domEls.push(el));
+
+  if (domEls.length === 0) return;
+
+  const firstEl = domEls[Math.min(s, domEls.length-1)];
+  const lastEl  = domEls[Math.min(e, domEls.length-1)];
+  if (!firstEl || !lastEl) return;
+
+  const pad = 20;
+  const topPx    = Math.max(0, getOffsetFromRoot(firstEl, root) - pad);
+  const bottomPx = getOffsetFromRoot(lastEl, root) + lastEl.offsetHeight + pad;
+  const cropH    = bottomPx - topPx;
+
+  if (cropH <= 0) return;
+
+  document.getElementById('loading').classList.add('show');
+  html2canvas(root, {scale:3, useCORS:true, allowTaint:true, backgroundColor:null, logging:false})
+  .then(canvas => {
+    const scale = 3;
+    const sy = Math.round(topPx * scale);
+    const sh = Math.round(cropH * scale);
+    const clampedSy = Math.max(0, Math.min(sy, canvas.height - 1));
+    const clampedSh = Math.min(sh, canvas.height - clampedSy);
+
+    const out = document.createElement('canvas');
+    out.width  = canvas.width;
+    out.height = clampedSh;
+    const ctx = out.getContext('2d');
+    ctx.drawImage(canvas, 0, clampedSy, canvas.width, clampedSh, 0, 0, canvas.width, clampedSh);
+
+    const a = document.createElement('a');
+    a.download = 'ig-dm-range.png';
+    a.href = out.toDataURL('image/png');
+    a.click();
+    document.getElementById('loading').classList.remove('show');
+  }).catch(() => {
+    document.getElementById('loading').classList.remove('show');
+    alert('Try Chrome.');
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ── SLIDESHOW MAKER ──
+// ══════════════════════════════════════════════════════════════════════
+
+let unifiedSlides = []; // [{type:'dm'|'break'|'image', id, ...}]
+let lastMsgSig = '';
+let dragSrcIdx = -1;
+
+function openSlideshowModal() {
+  const sig = JSON.stringify(messages.map(m => m.type + m.text + m.side + (m.img?'1':''))) + (storySrc ? '1' : '0');
+  if (unifiedSlides.length === 0 || sig !== lastMsgSig) {
+    rebuildUnifiedSlides();
+    lastMsgSig = sig;
+  }
+  document.getElementById('slideshow-modal').classList.add('show');
+  renderUnifiedList();
+  updateSlideshowUI();
+}
+
+function closeSlideshowModal() {
+  document.getElementById('slideshow-modal').classList.remove('show');
+}
+
+function rebuildUnifiedSlides() {
+  const savedT = {}, savedSel = {};
+  unifiedSlides.filter(s => s.type === 'dm').forEach(s => { savedT[s.id] = s.timing; savedSel[s.id] = s.selected; });
+  const savedImgT = {}, savedEdits = {};
+  unifiedSlides.filter(s => s.type === 'image').forEach(s => {
+    savedImgT[s.id] = s.timing;
+    savedEdits[s.id] = {editedSrc:s.editedSrc, editText:s.editText, editTxtX:s.editTxtX, editTxtY:s.editTxtY, editFontSize:s.editFontSize, editColor:s.editColor, editBold:s.editBold, editItalic:s.editItalic, editStroke:s.editStroke, editShadow:s.editShadow, editBg:s.editBg, editBgColor:s.editBgColor, editRotation:s.editRotation};
+  });
+
+  const fresh = [];
+  if (storySrc) fresh.push({type:'dm', id:'story', label:'Story reply', side:'story', msgType:'story', selected: savedSel['story'] !== false, timing: savedT['story'] || 0.8});
+  let bc = 0, mc = 0;
+  messages.forEach((m, i) => {
+    if (m.type === 'batch_break') {
+      fresh.push({type:'break', id:`brk_${bc++}`});
+    } else if (m.type === 'batch_meme') {
+      const id = `meme_${mc++}`;
+      const saved = savedEdits[id] || {};
+      const slide = {type:'image', id, src: m.img || null, name: m.img ? 'meme slide' : '(no image — upload in builder)', timing: savedImgT[id] || 3.0, msgIdx: i,
+        editText: m.caption || saved.editText || '', editedSrc: saved.editedSrc,
+        editTxtX: saved.editTxtX, editTxtY: saved.editTxtY, editFontSize: saved.editFontSize,
+        editColor: saved.editColor, editBold: saved.editBold, editItalic: saved.editItalic,
+        editStroke: saved.editStroke, editShadow: saved.editShadow, editBg: saved.editBg,
+        editBgColor: saved.editBgColor, editRotation: saved.editRotation};
+      fresh.push(slide);
+      if (m.caption && m.img && !saved.editedSrc) autoApplyCaption(slide);
+    } else {
+      const id = `msg_${i}`;
+      fresh.push({type:'dm', id, label: m.type==='image'?'[Image]': m.type==='viewonce'?'[① Photo]': (m.text||'[empty]'), side: m.side, msgType: m.type, selected: savedSel[id] !== false, timing: savedT[id] || 0.8});
+    }
+  });
+  unifiedSlides = fresh;
+}
+
+function autoApplyCaption(slide) {
+  const img = new Image();
+  img.onload = () => {
+    const sc = 2, w = img.width * sc, h = img.height * sc;
+    const fc = document.createElement('canvas');
+    fc.width = w; fc.height = h;
+    const ctx = fc.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    const fs = Math.round(h * 0.055);
+    const fi = '800 ' + fs + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+    ctx.font = fi; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const cx = w / 2, cy = h * 0.88;
+    const mw = ctx.measureText(slide.editText).width;
+    const bw = mw + 14 * sc, bh = fs * 1.3 + 10 * sc, r = 4 * sc;
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    ctx.beginPath();
+    ctx.moveTo(cx - bw/2 + r, cy - bh/2); ctx.lineTo(cx + bw/2 - r, cy - bh/2);
+    ctx.quadraticCurveTo(cx + bw/2, cy - bh/2, cx + bw/2, cy - bh/2 + r);
+    ctx.lineTo(cx + bw/2, cy + bh/2 - r); ctx.quadraticCurveTo(cx + bw/2, cy + bh/2, cx + bw/2 - r, cy + bh/2);
+    ctx.lineTo(cx - bw/2 + r, cy + bh/2); ctx.quadraticCurveTo(cx - bw/2, cy + bh/2, cx - bw/2, cy + bh/2 - r);
+    ctx.lineTo(cx - bw/2, cy - bh/2 + r); ctx.quadraticCurveTo(cx - bw/2, cy - bh/2, cx - bw/2 + r, cy - bh/2);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.fillText(slide.editText, cx, cy);
+    slide.editedSrc = fc.toDataURL('image/png');
+    slide.editTxtX = 0.5; slide.editTxtY = 0.88;
+    slide.editFontSize = Math.round(fs / sc);
+    slide.editColor = '#ffffff'; slide.editBold = true; slide.editBg = true;
+    slide.editBgColor = 'rgba(0,0,0,0.65)';
+    renderUnifiedList();
+  };
+  img.src = slide.src;
+}
+
+function renderUnifiedList() {
+  const list = document.getElementById('slideshow-list');
+  list.innerHTML = '';
+  if (unifiedSlides.length === 0) {
+    list.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.3);padding:12px;text-align:center">No messages yet</div>';
+    return;
+  }
+  unifiedSlides.forEach((item, idx) => {
+    const el = document.createElement('div');
+    el.draggable = true;
+
+    if (item.type === 'break') {
+      el.className = 'slide-break';
+      el.innerHTML = `<span class="drag-handle">⠿</span><div class="slideshow-batch-line"></div><span class="slideshow-batch-lbl">-b-</span><div class="slideshow-batch-line"></div><button class="delbtn" onclick="removeUnifiedItem(${idx})" style="width:16px;height:16px;font-size:8px;flex-shrink:0">✕</button>`;
+    } else if (item.type === 'image') {
+      el.className = 'slide-break';
+      el.style.borderColor = 'rgba(139,92,246,0.25)';
+      el.style.background = 'rgba(139,92,246,0.05)';
+      const thumbSrc = item.editedSrc || item.src;
+      el.innerHTML = `
+        <span class="drag-handle">⠿</span>
+        <div class="slideshow-batch-line" style="background:rgba(139,92,246,0.3)"></div>
+        <span class="slideshow-batch-lbl" style="color:#c4b5fd">-m-</span>
+        <img class="meme-thumb" src="${thumbSrc}" style="flex-shrink:0">
+        <span class="meme-name">${item.name.replace(/</g,'&lt;')}</span>
+        <button onclick="openImgEditor(${idx})" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);color:#c4b5fd;border-radius:4px;padding:2px 7px;font-size:9px;font-weight:600;cursor:pointer;flex-shrink:0">${item.editedSrc ? '✏ Edit' : '+ Text'}</button>
+        <div class="si-timing">
+          <input type="number" step="0.1" min="0.1" max="30" value="${item.timing}" onchange="updateUnifiedTiming(${idx},this.value)"/>
+          <span>s</span>
+        </div>
+        <div class="slideshow-batch-line" style="background:rgba(139,92,246,0.3)"></div>
+        <button class="delbtn" onclick="removeUnifiedItem(${idx})" style="width:16px;height:16px;font-size:8px;flex-shrink:0">✕</button>`;
+    } else {
+      el.className = 'slideshow-item' + (item.selected ? ' selected' : '');
+      const sc = item.side === 'story' ? 'story' : item.side;
+      const sl = item.side === 'story' ? 'STORY' : item.side.toUpperCase();
+      const tag = item.msgType === 'image' ? '<span class="si-tag">IMG</span>' : item.msgType === 'viewonce' ? '<span class="si-tag">① PHOTO</span>' : '';
+      el.innerHTML = `
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" ${item.selected?'checked':''} onchange="toggleUnifiedItem(${idx})"/>
+        <span class="si-num">${idx+1}</span>
+        <span class="si-side ${sc}">${sl}</span>
+        <span class="si-text">${item.label.replace(/</g,'&lt;').substring(0,50)}</span>
+        ${tag}
+        <div class="si-timing">
+          <input type="number" step="0.1" min="0.1" max="10" value="${item.timing}" onchange="updateUnifiedTiming(${idx},this.value)"/>
+          <span>s</span>
+        </div>`;
+    }
+
+    el.addEventListener('dragstart', e => {
+      dragSrcIdx = idx;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => el.style.opacity = '0.4', 0);
+    });
+    el.addEventListener('dragend', () => {
+      el.style.opacity = '';
+      document.querySelectorAll('#slideshow-list > *').forEach(c => c.classList.remove('drag-over'));
+    });
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      document.querySelectorAll('#slideshow-list > *').forEach(c => c.classList.remove('drag-over'));
+      el.classList.add('drag-over');
+    });
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      if (dragSrcIdx < 0 || dragSrcIdx === idx) return;
+      const moved = unifiedSlides.splice(dragSrcIdx, 1)[0];
+      const target = dragSrcIdx < idx ? idx - 1 : idx;
+      unifiedSlides.splice(target, 0, moved);
+      dragSrcIdx = -1;
+      renderUnifiedList();
+      updateSlideshowUI();
+    });
+
+    list.appendChild(el);
+  });
+}
+
+function toggleUnifiedItem(idx) {
+  if (unifiedSlides[idx].type !== 'dm') return;
+  unifiedSlides[idx].selected = !unifiedSlides[idx].selected;
+  renderUnifiedList();
+  updateSlideshowUI();
+}
+
+function updateUnifiedTiming(idx, val) {
+  const v = parseFloat(val);
+  if (!isNaN(v) && v >= 0.1) { unifiedSlides[idx].timing = v; updateSlideshowUI(); }
+}
+
+function removeUnifiedItem(idx) {
+  unifiedSlides.splice(idx, 1);
+  renderUnifiedList();
+  updateSlideshowUI();
+}
+
+function addImageSlide() {
+  document.getElementById('meme-file-input').click();
+}
+
+function handleMemeFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    unifiedSlides.push({type:'image', id:'img_'+Date.now(), src:ev.target.result, name:f.name, timing:3.0});
+    renderUnifiedList();
+    updateSlideshowUI();
+  };
+  reader.readAsDataURL(f);
+  e.target.value = '';
+}
+
+function applyUniversalTiming() {
+  const val = parseFloat(document.getElementById('universal-timing-input').value);
+  if (!isNaN(val) && val >= 0.1) {
+    unifiedSlides.forEach(s => { if (s.type !== 'break') s.timing = val; });
+    renderUnifiedList();
+    updateSlideshowUI();
+  }
+}
+
+function updateSlideshowUI() {
+  const total = unifiedSlides.reduce((sum, s) => {
+    if (s.type === 'break') return sum;
+    return sum + (s.selected !== false ? (s.timing || 0.8) : 0);
+  }, 0);
+  document.getElementById('slideshow-duration').textContent = `Estimated Duration: ${total.toFixed(1)} seconds`;
+  const hasContent = unifiedSlides.some(s => s.type === 'image' || (s.type === 'dm' && s.selected));
+  document.getElementById('slideshow-generate-btn').disabled = !hasContent;
+}
+
+async function generateSlideshow() {
+  const hasContent = unifiedSlides.some(s => s.type === 'image' || (s.type === 'dm' && s.selected));
+  if (!hasContent) { alert('Please select at least one item or add an image slide'); return; }
+  const captureScale = 2;
+
+  closeSlideshowModal();
+
+  const root = document.getElementById('capture-root');
+  const storyHdr = document.getElementById('ig-story-hdr');
+  const msgRows = Array.from(document.querySelectorAll('#ig-msgs > *'));
+
+  // Map DM ids → DOM elements
+  const domMap = {};
+  if (storySrc) domMap['story'] = {el: storyHdr, nat: 'block'};
+  let di = 0;
+  messages.forEach((m, i) => { if (m.type !== 'batch_break' && m.type !== 'batch_meme') { if (msgRows[di]) domMap[`msg_${i}`] = {el: msgRows[di], nat: 'flex'}; di++; } });
+
+  const bgColor = document.getElementById('c-bg').value;
+  const frames = [], durations = [];
+  const totalFrames = unifiedSlides.filter(s => s.type === 'image' || (s.type === 'dm' && s.selected)).length;
+  let frameCount = 0;
+
+  document.getElementById('loading').classList.add('show');
+  Object.values(domMap).forEach(({el}) => { el.style.display = 'none'; });
+
+  try {
+    const batchVisible = []; // ids of currently shown DM elements
+
+    for (const item of unifiedSlides) {
+      if (item.type === 'break' || item.type === 'image') {
+        // Reset current batch (hide all visible DM elements)
+        batchVisible.forEach(id => { if (domMap[id]) domMap[id].el.style.display = 'none'; });
+        batchVisible.length = 0;
+
+        if (item.type === 'image') {
+          frameCount++;
+          document.getElementById('loading-progress').textContent = `Preparing image ${frameCount} / ${totalFrames}…`;
+          const img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = item.editedSrc || item.src; });
+          const mW = root.offsetWidth * captureScale, mH = Math.round(mW * 16 / 9);
+          const mc = document.createElement('canvas'); mc.width = mW; mc.height = mH;
+          const mx = mc.getContext('2d');
+          mx.fillStyle = '#000'; mx.fillRect(0, 0, mW, mH);
+          // 0.82 pad: image fills at most 82% of each canvas dimension, giving
+          // visible black borders so the meme looks contained rather than zoomed,
+          // and survives Android player fill-mode cropping (~10% edges).
+          const pad = 0.82;
+          const sc = Math.min(mW * pad / img.width, mH * pad / img.height);
+          mx.drawImage(img, (mW - img.width*sc)/2, (mH - img.height*sc)/2, img.width*sc, img.height*sc);
+          frames.push(mc); durations.push(item.timing || 3);
+        }
+        continue;
+      }
+
+      if (item.type === 'dm' && item.selected && domMap[item.id]) {
+        frameCount++;
+        document.getElementById('loading-progress').textContent = `Capturing frame ${frameCount} / ${totalFrames}…`;
+        domMap[item.id].el.style.display = domMap[item.id].nat;
+        batchVisible.push(item.id);
+        await new Promise(r => setTimeout(r, 150));
+        const canvas = await html2canvas(root, {scale:captureScale, useCORS:true, allowTaint:true, backgroundColor:bgColor, logging:false});
+        frames.push(canvas); durations.push(item.timing || 0.8);
+      }
+    }
+
+    Object.values(domMap).forEach(({el}) => { el.style.display = ''; });
+    if (frames.length === 0) { document.getElementById('loading').classList.remove('show'); return; }
+    if (!slideshowAudio.file && slideshowAudio.blobUrl) {
+      const unlocked = audioStash.find(a => a.blobUrl === slideshowAudio.blobUrl && a.file);
+      if (unlocked) { slideshowAudio.file = unlocked.file; slideshowAudio.blobUrl = null; }
+    }
+    const aFile  = slideshowAudio.file;
+    const aStart = parseFloat(document.getElementById('audio-start').value) || 0;
+    const aEnd   = parseFloat(document.getElementById('audio-end').value)   || 0;
+    await sendToServer(frames, durations, aFile, aStart, aEnd);
+
+  } catch (err) {
+    Object.values(domMap).forEach(({el}) => { el.style.display = ''; });
+    console.error(err);
+    alert('Failed to generate slideshow: ' + (err.message || err));
+  }
+
+  document.getElementById('loading').classList.remove('show');
+  document.getElementById('loading-progress').textContent = '';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ── AUDIO ──
+// ══════════════════════════════════════════════════════════════════════
+let slideshowAudio = { file: null, name: '', blobUrl: null };
+
+function handleAudioFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  slideshowAudio.file = f;
+  document.getElementById('audio-file-name').textContent = f.name;
+  document.getElementById('audio-clear-btn').style.display = '';
+  document.getElementById('audio-trim-row').style.display = 'flex';
+  e.target.value = '';
+}
+
+function clearAudio() {
+  slideshowAudio = { file: null, name: '', blobUrl: null };
+  document.getElementById('audio-file-name').textContent = 'No audio selected';
+  document.getElementById('audio-clear-btn').style.display = 'none';
+  document.getElementById('audio-trim-row').style.display = 'none';
+  document.getElementById('audio-start').value = '0';
+  document.getElementById('audio-end').value = '';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ── IMAGE EDITOR ──
+// ══════════════════════════════════════════════════════════════════════
+
+const IE_PRESETS = [
+  // ── Basic ──
+  {fs:'color:#fff',bs:'background:#333;border-color:#555',color:'#ffffff',bold:false,italic:false,stroke:false,shadow:false,bg:false},
+  {fs:'color:#fff;font-weight:800',bs:'background:#222',color:'#ffffff',bold:true,italic:false,stroke:true,shadow:false,bg:false},
+  {fs:'color:#FFD700;font-weight:800',bs:'background:#222',color:'#FFD700',bold:true,italic:false,stroke:true,shadow:false,bg:false},
+  {fs:'color:#FF4444;font-weight:800',bs:'background:#222',color:'#FF4444',bold:true,italic:false,stroke:true,shadow:false,bg:false},
+  {fs:'color:#4ade80;font-weight:800',bs:'background:#1a3325',color:'#4ade80',bold:true,italic:false,stroke:false,shadow:true,bg:false},
+  {fs:'color:#fff;font-weight:800',bs:'background:#111',color:'#ffffff',bold:true,italic:false,stroke:false,shadow:true,bg:false},
+  {fs:'color:#fff;font-weight:800',bs:'background:#000',color:'#ffffff',bold:true,italic:false,stroke:false,shadow:false,bg:true,bgColor:'rgba(0,0,0,0.76)'},
+  {fs:'color:#000;font-weight:800',bs:'background:#fff;border-color:#ccc',color:'#000000',bold:true,italic:false,stroke:false,shadow:false,bg:true,bgColor:'rgba(255,255,255,0.92)'},
+  {fs:'color:#fff;font-weight:800',bs:'background:#8b5cf6',color:'#ffffff',bold:true,italic:false,stroke:false,shadow:false,bg:true,bgColor:'rgba(139,92,246,0.86)'},
+  {fs:'color:#FF6EB4;font-weight:800',bs:'background:#222',color:'#FF6EB4',bold:true,italic:false,stroke:true,shadow:false,bg:false},
+  {fs:'color:#fff;font-style:italic',bs:'background:#222',color:'#ffffff',bold:false,italic:true,stroke:false,shadow:true,bg:false},
+  {fs:'color:#FFA500;font-weight:800',bs:'background:#221800',color:'#FFA500',bold:true,italic:false,stroke:true,shadow:false,bg:false},
+  // ── TikTok / IG Caption Styles ──
+  // Impact — classic thick meme caption (like "off to a strong start")
+  {fs:'color:#fff;font-family:Impact,Arial Black,sans-serif',bs:'background:#111;border-color:#444',color:'#ffffff',bold:false,italic:false,stroke:true,shadow:false,bg:false,font:'Impact,Arial Black,sans-serif'},
+  // Impact yellow — classic top-text meme
+  {fs:'color:#FFD700;font-family:Impact,Arial Black,sans-serif',bs:'background:#111;border-color:#554400',color:'#FFD700',bold:false,italic:false,stroke:true,shadow:false,bg:false,font:'Impact,Arial Black,sans-serif'},
+  // TikTok caption — bold system, white + stroke (like "how my microwave feels")
+  {fs:'color:#fff;font-weight:700',bs:'background:#1a1a1a;border-color:#3a3a3a',color:'#ffffff',bold:true,italic:false,stroke:true,shadow:true,bg:false,font:'-apple-system,BlinkMacSystemFont,sans-serif'},
+  // POV style — bold + stroke, large feel (like "POV: Football fans...")
+  {fs:'color:#fff;font-weight:800',bs:'background:#0a0a18;border-color:#2a2a4a',color:'#ffffff',bold:true,italic:false,stroke:true,shadow:false,bg:false,font:'-apple-system,BlinkMacSystemFont,sans-serif'},
+  // Dark pill BG — IG caption on dark overlay (like "claude: Apply changes")
+  {fs:'color:#fff;font-weight:700',bs:'background:#000',color:'#ffffff',bold:true,italic:false,stroke:false,shadow:false,bg:true,bgColor:'rgba(0,0,0,0.72)',font:'-apple-system,BlinkMacSystemFont,sans-serif'},
+  // Impact + shadow — cinematic title feel
+  {fs:'color:#fff;font-family:Impact,Arial Black,sans-serif',bs:'background:#222;border-color:#555',color:'#ffffff',bold:false,italic:false,stroke:false,shadow:true,bg:false,font:'Impact,Arial Black,sans-serif'},
+  // Comic Sans — silly/relatable meme style
+  {fs:'color:#fff;font-family:"Comic Sans MS",cursive',bs:'background:#1a1030;border-color:#5a3090',color:'#ffffff',bold:false,italic:false,stroke:true,shadow:false,bg:false,font:'"Comic Sans MS","Comic Sans",cursive'},
+  // Georgia serif — elegant caption
+  {fs:'color:#fff;font-style:italic;font-family:Georgia,serif',bs:'background:#0f0f0f;border-color:#444',color:'#ffffff',bold:false,italic:true,stroke:false,shadow:true,bg:false,font:'Georgia,serif'},
+];
+
+let ieState = {
+  slideIdx: -1, img: null, canvas: null, ctx: null,
+  canvasW: 460, canvasH: 300,
+  txt: {
+    content:'Add text here', x:0.5, y:0.5,
+    fontSize:36, color:'#ffffff',
+    bold:false, italic:false, stroke:true, shadow:false,
+    bg:false, bgColor:'rgba(0,0,0,0.65)', rotation:0,
+    font:'-apple-system,BlinkMacSystemFont,sans-serif',
+    strokeWidth:30, strokeColor:'#000000'
+  },
+  interaction: null,
+  mx0:0, my0:0, txtX0:0, txtY0:0, size0:0,
+  activePreset: -1
+};
+
+function openImgEditor(slideIdx) {
+  const slide = unifiedSlides[slideIdx];
+  if (!slide || !slide.src) { alert('No image on this slide. Upload an image first.'); return; }
+  ieState.slideIdx = slideIdx;
+  ieState.activePreset = -1;
+  ieState.txt = {
+    content:   slide.editText     || 'Add text here',
+    x:         slide.editTxtX     !== undefined ? slide.editTxtX  : 0.5,
+    y:         slide.editTxtY     !== undefined ? slide.editTxtY  : 0.5,
+    fontSize:  slide.editFontSize || 36,
+    color:     slide.editColor    || '#ffffff',
+    bold:      slide.editBold     || false,
+    italic:    slide.editItalic   || false,
+    stroke:      slide.editStroke !== undefined ? slide.editStroke : true,
+    shadow:      slide.editShadow      || false,
+    bg:          slide.editBg          || false,
+    bgColor:     slide.editBgColor     || 'rgba(0,0,0,0.65)',
+    rotation:    slide.editRotation    || 0,
+    font:        slide.editFont        || '-apple-system,BlinkMacSystemFont,sans-serif',
+    strokeWidth: slide.editStrokeWidth !== undefined ? slide.editStrokeWidth : 30,
+    strokeColor: slide.editStrokeColor || '#000000'
+  };
+  document.getElementById('ie-text-input').value    = ieState.txt.content;
+  document.getElementById('ie-font-size').value     = ieState.txt.fontSize;
+  document.getElementById('ie-color').value         = ieState.txt.color;
+  document.getElementById('ie-font-family').value   = ieState.txt.font;
+  document.getElementById('ie-stroke-width').value  = ieState.txt.strokeWidth;
+  document.getElementById('ie-stroke-color').value  = ieState.txt.strokeColor;
+  ['bold','italic','stroke','shadow','bg'].forEach(p =>
+    document.getElementById('ie-'+p+'-btn').classList.toggle('active', ieState.txt[p])
+  );
+  // Build presets
+  const pc = document.getElementById('ie-presets');
+  pc.innerHTML = '';
+  IE_PRESETS.forEach((p, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'ie-preset-btn';
+    btn.style.cssText = p.bs;
+    btn.innerHTML = '<span style="' + p.fs + ';font-size:13px;pointer-events:none">Aa</span>';
+    btn.title = 'Preset ' + (i+1);
+    btn.onclick = () => applyIEPreset(i);
+    pc.appendChild(btn);
+  });
+  const imgEl = new Image();
+  imgEl.onload = () => {
+    ieState.img = imgEl;
+    const maxW = 460, maxH = 380;
+    const sc = Math.min(maxW / imgEl.width, maxH / imgEl.height, 1);
+    const cw = Math.round(imgEl.width * sc);
+    const ch = Math.round(imgEl.height * sc);
+    const canvas = document.getElementById('img-editor-canvas');
+    canvas.width = cw; canvas.height = ch;
+    canvas.style.width = cw + 'px'; canvas.style.height = ch + 'px';
+    ieState.canvas = canvas; ieState.ctx = canvas.getContext('2d');
+    ieState.canvasW = cw; ieState.canvasH = ch;
+    canvas.onmousedown  = ieMouseDown;
+    canvas.onmousemove  = ieMouseMove;
+    canvas.onmouseup    = ieMouseUp;
+    canvas.onmouseleave = ieMouseUp;
+    canvas.ontouchstart = ev => { ev.preventDefault(); ieMouseDown(ev.touches[0]); };
+    canvas.ontouchmove  = ev => { ev.preventDefault(); ieMouseMove(ev.touches[0]); };
+    canvas.ontouchend   = ieMouseUp;
+    ieRedraw();
+    document.getElementById('img-editor-modal').classList.add('show');
+  };
+  imgEl.src = slide.src;
+}
+
+function closeImgEditor() {
+  document.getElementById('img-editor-modal').classList.remove('show');
+}
+
+function ieFont(size) {
+  const {italic,bold,font} = ieState.txt;
+  const ff = font || '-apple-system,BlinkMacSystemFont,sans-serif';
+  return (italic?'italic ':'') + (bold?'800 ':'') + size + 'px ' + ff;
+}
+
+function ieBBox() {
+  const {ctx,txt,canvasW,canvasH} = ieState;
+  if (!ctx) return {cx:230,cy:150,x:180,y:130,w:100,h:40};
+  ctx.font = ieFont(txt.fontSize);
+  const m = ctx.measureText(txt.content || ' ');
+  const pad = txt.bg ? 14 : 6;
+  const w = m.width + pad;
+  const h = txt.fontSize * 1.3 + (txt.bg ? 10 : 4);
+  const cx = txt.x * canvasW, cy = txt.y * canvasH;
+  return {cx, cy, w, h, x: cx - w/2, y: cy - h/2};
+}
+
+function ieRedraw() {
+  const {canvas,ctx,img,txt,canvasW,canvasH} = ieState;
+  if (!canvas||!ctx||!img) return;
+  txt.content     = document.getElementById('ie-text-input').value;
+  txt.fontSize    = Math.max(8, parseInt(document.getElementById('ie-font-size').value)||36);
+  txt.color       = document.getElementById('ie-color').value;
+  txt.font        = document.getElementById('ie-font-family').value;
+  txt.strokeWidth = Math.max(1, parseInt(document.getElementById('ie-stroke-width').value)||30);
+  txt.strokeColor = document.getElementById('ie-stroke-color').value;
+  ctx.clearRect(0,0,canvasW,canvasH);
+  ctx.drawImage(img,0,0,canvasW,canvasH);
+  const bb = ieBBox();
+  ctx.save();
+  ctx.translate(bb.cx,bb.cy);
+  ctx.rotate(txt.rotation * Math.PI/180);
+  ctx.font = ieFont(txt.fontSize);
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetX=0; ctx.shadowOffsetY=0;
+  if (txt.bg) {
+    ctx.fillStyle = txt.bgColor;
+    const r=4, bw=bb.w, bh=bb.h;
+    ctx.beginPath();
+    ctx.moveTo(-bw/2+r,-bh/2); ctx.lineTo(bw/2-r,-bh/2);
+    ctx.quadraticCurveTo(bw/2,-bh/2,bw/2,-bh/2+r);
+    ctx.lineTo(bw/2,bh/2-r); ctx.quadraticCurveTo(bw/2,bh/2,bw/2-r,bh/2);
+    ctx.lineTo(-bw/2+r,bh/2); ctx.quadraticCurveTo(-bw/2,bh/2,-bw/2,bh/2-r);
+    ctx.lineTo(-bw/2,-bh/2+r); ctx.quadraticCurveTo(-bw/2,-bh/2,-bw/2+r,-bh/2);
+    ctx.closePath(); ctx.fill();
+  }
+  if (txt.shadow) { ctx.shadowColor='rgba(0,0,0,0.85)'; ctx.shadowBlur=8; ctx.shadowOffsetX=2; ctx.shadowOffsetY=2; }
+  if (txt.stroke) { ctx.strokeStyle=txt.strokeColor||'#000'; ctx.lineWidth=Math.max(1,(txt.strokeWidth||30)*(txt.fontSize||36)/100); ctx.lineJoin='round'; ctx.strokeText(txt.content,0,0); }
+  ctx.fillStyle=txt.color; ctx.fillText(txt.content,0,0);
+  ctx.restore();
+  // Handles
+  ctx.save();
+  const rHY = bb.y - 24;
+  ctx.strokeStyle='rgba(255,255,255,0.65)'; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+  ctx.strokeRect(bb.x-3, bb.y-3, bb.w+6, bb.h+6); ctx.setLineDash([]);
+  ctx.strokeStyle='rgba(255,255,255,0.35)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(bb.cx,bb.y-3); ctx.lineTo(bb.cx,rHY+8); ctx.stroke();
+  ctx.fillStyle='#e8a87c'; ctx.beginPath(); ctx.arc(bb.cx,rHY,8,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle='#000'; ctx.font='10px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('↻',bb.cx,rHY);
+  const rsX=bb.x+bb.w+5, rsY=bb.y+bb.h+5;
+  ctx.fillStyle='#4ade80'; ctx.fillRect(rsX-6,rsY-6,12,12);
+  ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1; ctx.strokeRect(rsX-6,rsY-6,12,12);
+  ctx.restore();
+}
+
+function applyIEPreset(idx) {
+  const p = IE_PRESETS[idx]; ieState.activePreset = idx;
+  Object.assign(ieState.txt, {color:p.color,bold:p.bold||false,italic:p.italic||false,stroke:p.stroke||false,shadow:p.shadow||false,bg:p.bg||false});
+  if (p.bgColor) ieState.txt.bgColor = p.bgColor;
+  if (p.font) { ieState.txt.font = p.font; document.getElementById('ie-font-family').value = p.font; }
+  document.getElementById('ie-color').value = p.color;
+  ['bold','italic','stroke','shadow','bg'].forEach(prop =>
+    document.getElementById('ie-'+prop+'-btn').classList.toggle('active', ieState.txt[prop])
+  );
+  document.querySelectorAll('.ie-preset-btn').forEach((btn,i) => btn.classList.toggle('active', i===idx));
+  ieRedraw();
+}
+
+function ieToggle(prop) {
+  ieState.txt[prop] = !ieState.txt[prop];
+  document.getElementById('ie-'+prop+'-btn').classList.toggle('active', ieState.txt[prop]);
+  ieRedraw();
+}
+
+function ieEnableStroke() {
+  if (!ieState.txt.stroke) {
+    ieState.txt.stroke = true;
+    document.getElementById('ie-stroke-btn').classList.add('active');
+  }
+  ieRedraw();
+}
+
+function ieMouse(e) {
+  const rect = ieState.canvas.getBoundingClientRect();
+  return {x:(e.clientX-rect.left)*(ieState.canvasW/rect.width), y:(e.clientY-rect.top)*(ieState.canvasH/rect.height)};
+}
+
+function ieMouseDown(e) {
+  if (!ieState.canvas) return;
+  const {x:mx,y:my} = ieMouse(e);
+  const bb = ieBBox();
+  const rHY = bb.y - 24;
+  if (Math.hypot(mx-bb.cx, my-rHY) < 11) {
+    ieState.interaction='rotate'; ieState.mx0=mx; ieState.my0=my; return;
+  }
+  const rsX=bb.x+bb.w+5, rsY=bb.y+bb.h+5;
+  if (Math.abs(mx-rsX)<9 && Math.abs(my-rsY)<9) {
+    ieState.interaction='resize'; ieState.mx0=mx; ieState.my0=my; ieState.size0=ieState.txt.fontSize; return;
+  }
+  if (mx>=bb.x-8&&mx<=bb.x+bb.w+8&&my>=bb.y-8&&my<=bb.y+bb.h+8) {
+    ieState.interaction='drag'; ieState.mx0=mx; ieState.my0=my;
+    ieState.txtX0=ieState.txt.x*ieState.canvasW; ieState.txtY0=ieState.txt.y*ieState.canvasH;
+  }
+}
+
+function ieMouseMove(e) {
+  if (!ieState.interaction||!ieState.canvas) return;
+  const {x:mx,y:my} = ieMouse(e);
+  const bb = ieBBox();
+  if (ieState.interaction==='drag') {
+    ieState.txt.x = Math.max(0.02,Math.min(0.98,(ieState.txtX0+mx-ieState.mx0)/ieState.canvasW));
+    ieState.txt.y = Math.max(0.02,Math.min(0.98,(ieState.txtY0+my-ieState.my0)/ieState.canvasH));
+  } else if (ieState.interaction==='rotate') {
+    ieState.txt.rotation = Math.round(Math.atan2(my-bb.cy, mx-bb.cx)*180/Math.PI + 90);
+  } else if (ieState.interaction==='resize') {
+    ieState.txt.fontSize = Math.max(8,Math.min(200,Math.round(ieState.size0+(my-ieState.my0)*0.5)));
+    document.getElementById('ie-font-size').value = ieState.txt.fontSize;
+  }
+  ieRedraw();
+}
+
+function ieMouseUp() { ieState.interaction = null; }
+
+function saveImgEdit() {
+  const {canvas,img,txt,canvasW,canvasH,slideIdx} = ieState;
+  if (!canvas||slideIdx<0) return;
+  const slide = unifiedSlides[slideIdx];
+  Object.assign(slide, {
+    editText:txt.content, editTxtX:txt.x, editTxtY:txt.y,
+    editFontSize:txt.fontSize, editColor:txt.color, editFont:txt.font,
+    editBold:txt.bold, editItalic:txt.italic, editStroke:txt.stroke,
+    editStrokeWidth:txt.strokeWidth, editStrokeColor:txt.strokeColor,
+    editShadow:txt.shadow, editBg:txt.bg, editBgColor:txt.bgColor, editRotation:txt.rotation
+  });
+  // Render final at 2x (no handles)
+  const sc=2, fc=document.createElement('canvas');
+  fc.width=canvasW*sc; fc.height=canvasH*sc;
+  const fc2=fc.getContext('2d');
+  fc2.drawImage(img,0,0,fc.width,fc.height);
+  const cx=txt.x*canvasW*sc, cy=txt.y*canvasH*sc, fs=txt.fontSize*sc;
+  fc2.save();
+  fc2.translate(cx,cy); fc2.rotate(txt.rotation*Math.PI/180);
+  const fi=txt.italic?'italic ':'', fw=txt.bold?'800 ':'';
+  const ff=txt.font||'-apple-system,BlinkMacSystemFont,sans-serif';
+  fc2.font=fi+fw+fs+'px '+ff;
+  fc2.textAlign='center'; fc2.textBaseline='middle';
+  fc2.shadowColor='transparent'; fc2.shadowBlur=0; fc2.shadowOffsetX=0; fc2.shadowOffsetY=0;
+  if (txt.bg) {
+    const m2=fc2.measureText(txt.content), bw=m2.width+14*sc, bh=fs*1.3+10*sc, r2=4*sc;
+    fc2.fillStyle=txt.bgColor;
+    fc2.beginPath();
+    fc2.moveTo(-bw/2+r2,-bh/2); fc2.lineTo(bw/2-r2,-bh/2); fc2.quadraticCurveTo(bw/2,-bh/2,bw/2,-bh/2+r2);
+    fc2.lineTo(bw/2,bh/2-r2); fc2.quadraticCurveTo(bw/2,bh/2,bw/2-r2,bh/2);
+    fc2.lineTo(-bw/2+r2,bh/2); fc2.quadraticCurveTo(-bw/2,bh/2,-bw/2,bh/2-r2);
+    fc2.lineTo(-bw/2,-bh/2+r2); fc2.quadraticCurveTo(-bw/2,-bh/2,-bw/2+r2,-bh/2);
+    fc2.closePath(); fc2.fill();
+  }
+  if (txt.shadow){fc2.shadowColor='rgba(0,0,0,0.85)';fc2.shadowBlur=8*sc;fc2.shadowOffsetX=2*sc;fc2.shadowOffsetY=2*sc;}
+  if (txt.stroke){fc2.strokeStyle=txt.strokeColor||'#000';fc2.lineWidth=Math.max(1,(txt.strokeWidth||30)*fs/100);fc2.lineJoin='round';fc2.strokeText(txt.content,0,0);}
+  fc2.fillStyle=txt.color; fc2.fillText(txt.content,0,0);
+  fc2.restore();
+  slide.editedSrc = fc.toDataURL('image/png');
+  closeImgEditor();
+  renderUnifiedList();
+}
+
+function _arrayBufToBase64(buf) {
+  let b = '', bytes = new Uint8Array(buf), n = bytes.length;
+  for (let i = 0; i < n; i += 8192) b += String.fromCharCode(...bytes.subarray(i, Math.min(i + 8192, n)));
+  return btoa(b);
+}
+
+async function sendToServer(frames, durations, audioFile, audioStart, audioEnd) {
+  document.getElementById('loading-progress').textContent = 'Preparing frames…';
+
+  const videoW = frames[0].width;
+  const videoH = Math.round(videoW * 16 / 9);
+  const frameData = frames.map((src, i) => {
+    const c = document.createElement('canvas');
+    c.width = videoW; c.height = videoH;
+    const cx = c.getContext('2d');
+    cx.fillStyle = '#000000';
+    cx.fillRect(0, 0, videoW, videoH);
+    const sf = Math.min(videoW / src.width, videoH / src.height);
+    const dw = Math.round(src.width * sf), dh = Math.round(src.height * sf);
+    cx.drawImage(src, Math.round((videoW - dw) / 2), Math.round((videoH - dh) / 2), dw, dh);
+    return { data: c.toDataURL('image/jpeg', 0.85), duration: durations[i] };
+  });
+
+  let audioData = null;
+  if (audioFile) {
+    document.getElementById('loading-progress').textContent = 'Preparing audio…';
+    const buf = await audioFile.arrayBuffer();
+    audioData = {
+      data: `data:${audioFile.type || 'audio/mpeg'};base64,${_arrayBufToBase64(buf)}`,
+      mime: audioFile.type || 'audio/mpeg',
+      start: audioStart || 0,
+      end: audioEnd || 0
+    };
+  }
+
+  document.getElementById('loading-progress').textContent = 'Uploading to server…';
+
+  const resp = await fetch('/api/render-video', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ frames: frameData, audio: audioData })
+  });
+
+  if (!resp.ok) {
+    const txt = await resp.text().catch(() => 'unknown error');
+    throw new Error('Server error: ' + txt);
+  }
+
+  document.getElementById('loading-progress').textContent = 'Downloading video…';
+  const blob = await resp.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ig-dm-slideshow.mp4';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ── STASH ──
+// ══════════════════════════════════════════════════════════════════════
+let memeStash = [];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let audioStash = [];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let _sid = 42; // stash item id counter
+
+// Fetch a single audio item on demand and cache as a blob URL.
+async function loadAudioItem(item) {
+  if (!item.blobUrl || item.blobUrl.startsWith('blob:')) return;
+  try {
+    const resp = await fetch(item.blobUrl);
+    if (resp.ok) {
+      const blob = await resp.blob();
+      item.file = new File([blob], item.name, { type: blob.type || 'audio/mpeg' });
+      item.blobUrl = URL.createObjectURL(blob);
+    }
+  } catch(e) { console.warn('Failed to load audio:', item.name, e); }
+}
+
+// Over HTTP the unlock button is unnecessary — lazy loading handles everything.
+if (location.protocol !== 'file:') {
+  const btn  = document.getElementById('unlock-audio-btn');
+  const hint = document.getElementById('audio-unlock-hint');
+  if (btn)  btn.style.display = 'none';
+  if (hint) hint.style.display = 'none';
+}
+
+// ── Stash sub-tab switch ──
+function switchStashTab(sub) {
+  document.getElementById('stash-memes-panel').style.display = sub==='memes' ? 'flex' : 'none';
+  document.getElementById('stash-audio-panel').style.display = sub==='audio' ? 'flex' : 'none';
+  document.getElementById('stash-tab-memes').classList.toggle('active', sub==='memes');
+  document.getElementById('stash-tab-audio').classList.toggle('active', sub==='audio');
+}
+
+// ── MEME STASH ──
+function addMemeToStash() { document.getElementById('stash-meme-file').click(); }
+
+function handleStashMeme(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  let done = 0;
+  files.forEach(f => {
+    const r = new FileReader();
+    r.onload = ev => {
+      memeStash.push({ id: ++_sid, name: f.name, src: ev.target.result });
+      if (++done === files.length) renderMemeStash();
+    };
+    r.readAsDataURL(f);
+  });
+  e.target.value = '';
+}
+
+function removeMemeFromStash(id) {
+  memeStash = memeStash.filter(m => m.id !== id);
+  renderMemeStash();
+}
+
+function renderMemeStash() {
+  const grid = document.getElementById('meme-stash-grid');
+  if (!memeStash.length) {
+    grid.innerHTML = '<div class="meme-stash-empty">No memes yet.<br>Click <b>+ Add Memes</b> to upload.</div>';
+    return;
+  }
+  grid.innerHTML = memeStash.map(m => `
+    <div class="meme-stash-card">
+      <img src="${m.src}" alt="">
+      <div class="meme-stash-card-name">${m.name.replace(/</g,'&lt;')}</div>
+      <button class="meme-stash-card-del" onclick="removeMemeFromStash(${m.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+// ── AUDIO STASH ──
+let _stashAudio = null; // shared preview audio element
+let _stashPlayId = null;
+
+function addAudioToStash() { document.getElementById('stash-audio-file').click(); }
+
+async function unlockStashAudio() {
+  // Use File System Access API (Chrome 86+) — lets user pick the auddio/ folder once
+  if (window.showDirectoryPicker) {
+    try {
+      const dir = await window.showDirectoryPicker({ mode: 'read', startIn: 'desktop' });
+      let count = 0;
+      for await (const [name, handle] of dir.entries()) {
+        if (handle.kind !== 'file') continue;
+        const matches = audioStash.filter(a => a.file === null && a.name === name);
+        if (matches.length) {
+          const f = await handle.getFile();
+          matches.forEach(a => { a.file = f; });
+          count++;
+        }
+      }
+      const btn = document.getElementById('unlock-audio-btn');
+      if (count > 0) {
+        if (btn) { btn.style.background='rgba(74,222,128,0.1)'; btn.style.borderColor='rgba(74,222,128,0.4)'; btn.style.color='#4ade80'; btn.innerHTML='<svg viewBox="0 0 24 24" style="width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.5"><polyline points="20 6 9 17 4 12"/></svg> ' + count + ' tracks unlocked ✓'; }
+        renderAudioStash();
+      } else {
+        alert('No matching audio found. Make sure to select the "auddio" folder (the folder right next to your HTML file).');
+      }
+    } catch(e) {
+      if (e.name === 'AbortError') return;
+      // Directory picker not supported or failed — fall back to file picker
+      document.getElementById('stash-audio-unlock-input').click();
+    }
+  } else {
+    // Fallback: multi-file picker
+    document.getElementById('stash-audio-unlock-input').click();
+  }
+}
+
+function handleAudioUnlockFiles(e) {
+  const files = Array.from(e.target.files);
+  let count = 0;
+  files.forEach(f => {
+    const matches = audioStash.filter(a => a.file === null && a.name === f.name);
+    if (matches.length) { matches.forEach(a => { a.file = f; }); count++; }
+  });
+  e.target.value = '';
+  if (count > 0) {
+    const btn = document.getElementById('unlock-audio-btn');
+    if (btn) { btn.style.background='rgba(74,222,128,0.1)'; btn.style.borderColor='rgba(74,222,128,0.4)'; btn.style.color='#4ade80'; btn.textContent = count + ' tracks unlocked ✓'; }
+    renderAudioStash();
+  }
+}
+
+function handleStashAudio(e) {
+  const f = e.target.files[0]; if (!f) return;
+  audioStash.push({ id: ++_sid, name: f.name, file: f, blobUrl: URL.createObjectURL(f) });
+  renderAudioStash();
+  e.target.value = '';
+}
+
+function removeAudioFromStash(id) {
+  const item = audioStash.find(a => a.id === id);
+  if (item && item.blobUrl && item.blobUrl.startsWith('blob:')) { URL.revokeObjectURL(item.blobUrl); }
+  if (_stashPlayId === id) { if(_stashAudio) _stashAudio.pause(); _stashPlayId = null; }
+  audioStash = audioStash.filter(a => a.id !== id);
+  renderAudioStash();
+}
+
+async function toggleStashAudio(id) {
+  if (!_stashAudio) {
+    _stashAudio = new Audio();
+    _stashAudio.onended = () => { _stashPlayId = null; renderAudioStash(); };
+  }
+  if (_stashPlayId === id) {
+    _stashAudio.pause(); _stashPlayId = null;
+  } else {
+    const item = audioStash.find(a => a.id === id);
+    if (!item) return;
+    await loadAudioItem(item);
+    _stashAudio.src = item.blobUrl;
+    _stashAudio.currentTime = 0;
+    _stashAudio.play();
+    _stashPlayId = id;
+  }
+  renderAudioStash();
+}
+
+function _cleanAudioName(n) {
+  return n.replace(/_musicaldown\.com_\d+\.mp3$/,'').replace(/\.mp3$/,'').replace(/^ssstik\.io_\d+$/,'TikTok Audio');
+}
+
+function renderAudioStash() {
+  const list = document.getElementById('audio-stash-list');
+  if (!audioStash.length) {
+    list.innerHTML = '<div class="meme-stash-empty">No audio yet.<br>Click <b>+ Add Audio</b> to upload.</div>';
+    return;
+  }
+  list.innerHTML = audioStash.map(a => {
+    const playing = _stashPlayId === a.id;
+    return `<div class="audio-stash-item">
+      <button class="audio-stash-play${playing?' playing':''}" onclick="toggleStashAudio(${a.id})">${playing?'⏸':'▶'}</button>
+      <span class="audio-stash-name">${_cleanAudioName(a.name).replace(/</g,'&lt;')}</span>
+
+    </div>`;
+  }).join('');
+}
+
+// ── MEME SOURCE PICKER (builder + img button) ──
+let _pendingMemeTarget = -1;
+
+function showMemeSourcePicker(msgIdx) {
+  _pendingMemeTarget = msgIdx;
+  document.getElementById('meme-source-modal').classList.add('show');
+}
+
+function selectMemeSource(source) {
+  document.getElementById('meme-source-modal').classList.remove('show');
+  if (source === 'file') {
+    pendingMsgIdx = _pendingMemeTarget;
+    document.getElementById('msg-file').click();
+  } else {
+    openStashMemePicker();
+  }
+}
+
+function openStashMemePicker() {
+  const grid = document.getElementById('smp-grid');
+  if (!memeStash.length) {
+    grid.innerHTML = '<div class="smp-empty">Your stash is empty!<br>Add memes via the <b>Stash</b> tab first.</div>';
+  } else {
+    grid.innerHTML = memeStash.map(m =>
+      `<div class="smp-card" onclick="selectMemeFromStash(${m.id})"><img src="${m.src}" alt=""></div>`
+    ).join('');
+  }
+  document.getElementById('stash-meme-picker').classList.add('show');
+}
+
+function closeStashMemePicker() {
+  document.getElementById('stash-meme-picker').classList.remove('show');
+}
+
+function selectMemeFromStash(id) {
+  const item = memeStash.find(m => m.id === id);
+  if (item && _pendingMemeTarget >= 0) {
+    messages[_pendingMemeTarget].img = item.src;
+    renderMsgList(); render(); syncBuilderToCode();
+  }
+  closeStashMemePicker();
+  _pendingMemeTarget = -1;
+}
+
+// ── AUDIO STASH PICKER (slideshow modal) ──
+let _asmAudio = null;
+let _asmPlayId = null;
+
+function openAudioStashModal() {
+  stopAsmAudio();
+  renderAudioStashModal();
+  document.getElementById('audio-stash-modal').classList.add('show');
+}
+
+function closeAudioStashModal() {
+  stopAsmAudio();
+  document.getElementById('audio-stash-modal').classList.remove('show');
+}
+
+function stopAsmAudio() {
+  if (_asmAudio) _asmAudio.pause();
+  _asmPlayId = null;
+}
+
+function renderAudioStashModal() {
+  const list = document.getElementById('asm-list');
+  if (!audioStash.length) {
+    list.innerHTML = '<div class="asm-empty">Your audio stash is empty!<br>Add audio via the <b>Stash</b> tab first.</div>';
+    return;
+  }
+  list.innerHTML = audioStash.map(a => {
+    const playing = _asmPlayId === a.id;
+    return `<div class="asm-item${playing?' playing':''}">
+      <button class="asm-play${playing?' playing':''}" onclick="toggleAsmAudio(${a.id})">${playing?'⏸':'▶'}</button>
+      <span class="asm-name">${_cleanAudioName(a.name).replace(/</g,'&lt;')}</span>
+      <button class="asm-select-btn" onclick="selectAudioFromStash(${a.id})">Use this</button>
+    </div>`;
+  }).join('');
+}
+
+async function toggleAsmAudio(id) {
+  if (!_asmAudio) {
+    _asmAudio = new Audio();
+    _asmAudio.onended = () => { _asmPlayId = null; renderAudioStashModal(); };
+  }
+  if (_asmPlayId === id) {
+    _asmAudio.pause(); _asmPlayId = null;
+  } else {
+    const item = audioStash.find(a => a.id === id);
+    if (!item) return;
+    await loadAudioItem(item);
+    _asmAudio.src = item.blobUrl;
+    _asmAudio.currentTime = 0;
+    _asmAudio.play();
+    _asmPlayId = id;
+  }
+  renderAudioStashModal();
+}
+
+async function selectAudioFromStash(id) {
+  const item = audioStash.find(a => a.id === id);
+  if (!item) { closeAudioStashModal(); return; }
+  stopAsmAudio();
+
+  await loadAudioItem(item);
+
+  // If we still don't have a File and we're on file://, the recording will
+  // most likely be silent due to Chrome's CORS isolation on captureStream
+  // tracks. Tell the user clearly so they can fix it.
+  if (!item.file && location.protocol === 'file:') {
+    const proceed = confirm(
+      `⚠️ Audio "${_cleanAudioName(item.name)}" couldn't be loaded directly.\n\n` +
+      `On file:// pages, Chrome blocks reading audio bytes — your generated video will likely be SILENT.\n\n` +
+      `To fix this:\n` +
+      `  • Recommended: Quit, then double-click start.command (runs on http://localhost — works perfectly).\n` +
+      `  • OR click "🔓 Enable Stash Audio for Video" in the Stash → Audio tab and pick the auddio folder.\n\n` +
+      `Click OK to use this audio anyway (video may have no audio).\n` +
+      `Click Cancel to go back.`
+    );
+    if (!proceed) return;
+  }
+
+  slideshowAudio.file   = item.file || null;
+  slideshowAudio.blobUrl = item.file ? null : item.blobUrl;
+  document.getElementById('audio-file-name').textContent = item.name;
+  document.getElementById('audio-clear-btn').style.display = '';
+  document.getElementById('audio-trim-row').style.display = 'flex';
+  closeAudioStashModal();
+}
+
+// ── SCRIPT MAKER IMPORT ──
+function showToast(msg) {
+  let t = document.getElementById('dm-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'dm-toast';
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:linear-gradient(90deg,#e8a87c,#c45c8a);color:#fff;font-size:12px;font-weight:600;padding:10px 18px;border-radius:8px;transform:translateY(80px);opacity:0;transition:all .25s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:10000;box-shadow:0 8px 24px rgba(0,0,0,0.4)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  requestAnimationFrame(() => { t.style.transform = 'translateY(0)'; t.style.opacity = '1'; });
+  clearTimeout(t._hide);
+  t._hide = setTimeout(() => { t.style.transform = 'translateY(80px)'; t.style.opacity = '0'; }, 2200);
+}
+
+(function checkScriptImport() {
+  const raw = localStorage.getItem('dmstudio_import');
+  if (!raw) return;
+  localStorage.removeItem('dmstudio_import');
+  const ta = document.getElementById('code-ta');
+  if (!ta) return;
+  ta.value = raw;
+  parseCode();
+  switchTab('builder');
+  setTimeout(() => showToast('Script imported from Script Maker'), 300);
+})();
+</script>
 
 <!-- RANGE PICKER MODAL -->
 <div id="range-modal">
