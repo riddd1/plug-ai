@@ -1,0 +1,20 @@
+# Dependencies
+backend/node_modules/
+
+# macOS
+.DS_Store
+
+# Large binary/media files — keep out of repo
+*.ttc
+auddio/
+meme/
+femal images/
+hooks images/
+*.mp3
+*.mp4
+
+# Local scripts
+*.command
+auddio.js
+auddio/
+.DS_Store
