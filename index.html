@@ -610,10 +610,6 @@ button,input,select,textarea{transition-property:background,border-color,color,b
       <svg viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
       Stash
     </button>
-    <button class="t-tab" id="tab-scriptmaker" onclick="location.href='scriptmaker.html'">
-      <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-      Script Maker
-    </button>
   </div>
 </div>
 
@@ -734,6 +730,13 @@ button,input,select,textarea{transition-property:background,border-color,color,b
         <svg viewBox="0 0 24 24" style="width:10px;height:10px;flex-shrink:0"><rect x="9" y="2" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         Copy Script
       </button>
+      <div style="height:1px;background:rgba(255,255,255,0.07);margin:2px 0"></div>
+      <div style="display:flex;gap:4px">
+        <button class="abtn" id="gen-slide-btn" onclick="selectScriptType('slide')" style="flex:1;justify-content:center;background:rgba(232,168,124,0.12);border-color:rgba(232,168,124,0.4);color:#e8a87c;padding:5px">Slide Scripts</button>
+        <button class="abtn" id="gen-typing-btn" onclick="selectScriptType('typing')" style="flex:1;justify-content:center;padding:5px">Typing Scripts</button>
+      </div>
+      <button class="gbtn" id="ai-gen-btn" onclick="generateAIScript()" style="padding:9px;font-size:11px">✨ Generate Script</button>
+      <div id="ai-gen-status" style="display:none;font-size:10px;color:rgba(255,255,255,0.4);text-align:center;padding:2px 0"></div>
     </div>
 
     <!-- STASH PANEL -->
@@ -1281,6 +1284,162 @@ function render() {
 }
 
 // ── COPY ──
+// ── AI SCRIPT GENERATOR ──
+let _scriptType = 'slide';
+function selectScriptType(type) {
+  _scriptType = type;
+  document.getElementById('gen-slide-btn').style.cssText = type==='slide'
+    ? 'flex:1;justify-content:center;background:rgba(232,168,124,0.12);border-color:rgba(232,168,124,0.4);color:#e8a87c;padding:5px'
+    : 'flex:1;justify-content:center;padding:5px';
+  document.getElementById('gen-typing-btn').style.cssText = type==='typing'
+    ? 'flex:1;justify-content:center;background:rgba(232,168,124,0.12);border-color:rgba(232,168,124,0.4);color:#e8a87c;padding:5px'
+    : 'flex:1;justify-content:center;padding:5px';
+}
+
+function _buildSlidePrompt() {
+  const hooks = ["test him pls he deleted his instagram search history 😐","test him pls his location is always off now 😐","test him pls he started caring about how he looks when he goes out alone 🙃","test him pls he gets defensive when i ask simple questions 😐","test him pls he came home with a hickey and said it was from a seatbelt 🙃","test him pls he has a contact saved as a man's name but the texts come in at 2am 😐","test him pls he started tilting his phone away when i walk past 🙃","test him pls he cleared his call log for the first time ever 😐","test him pls he goes out every other weekend and never says where 🙃","test him pls he has a second instagram i wasn't supposed to find 😐","test him pls he bought new cologne and hides it in his car 🙃","test him pls he started deleting his messages every night before bed 😐","test him pls his ring finger has a tan line and he says it's from a ring he lost 🙃"];
+  const hook = hooks[Math.floor(Math.random()*hooks.length)];
+  return `You are a viral social media script writer. You write fake Instagram DM loyalty test scripts where a girl (the tester) slides into a guy's DMs pretending to be a stranger, and through casual innocent conversation he slowly reveals he is cheating on or manipulating his girlfriend. Every script must feel completely real — written by a human, not AI. The audience must not be able to tell it was generated.
+
+Output ONLY the raw script. No stage directions. No brackets. No placeholder text like [mutual] or [name]. No commentary. No caption blocks at the end. No explanations. Just the script starting with **IMAGE 1**.
+
+EXACT FORMAT:
+**IMAGE 1**
+2) STORY_REPLY:
+1) ${hook}
+2) [her short casual reply]
+-b-
+**IMAGE 2**
+2) [her opening line]
+2) [her second line]
+1) [his reply]
+1) [his second line]
+-b-
+...continue...
+-b-
+-m-
+Caption: "his exact words" [emoji outside quotes]
+-b-
+...continue until kill line. End immediately after his kill line. Nothing after it.
+
+FORMAT RULES — never break these:
+- 6 to 10 images total. Never fewer than 6. Never more than 10.
+- Every image must have exactly 3 to 4 lines of dialogue. Never 2. Never 5. Never 6.
+- Every single line of dialogue must be SHORT. Maximum 8 words per line.
+- 1) = his lines (left gray bubble). 2) = her lines (right purple bubble)
+- -b- on its own line between every image every single time.
+- -m- then Caption: for memes — placed immediately after his most revealing line
+- 3 to 4 memes per script
+- Meme caption format exactly: Caption: "his exact words" emoji — emoji goes OUTSIDE the closing quote
+- Script ends immediately after his kill line. She does NOT respond after it. No seen text.
+- Natural conversation flow — not strict alternating 2)/1)/2)/1) every single line.
+
+CONTENT RULES:
+- She uses natural emojis throughout: 😏 👀 😭 😅 😇 💀 😐 🙃 etc
+- He uses casual lowercase texting: lmaoo, nah, ight, idk, wbu, fr, honestly, ngl, kinda, yeah, bet
+- HE brings up the girlfriend himself — she NEVER reveals she knows about a girlfriend BEFORE he mentions someone first.
+- She NEVER confronts him. Always stays curious, playful, casual, slightly flirty.
+- Every script must have a completely different hook, setting, scenario, manipulation style and kill line.
+
+THE KILL LINE:
+- One short line he drops completely casually, like it's nothing
+- So manipulative or revealing that the audience gasps even though he said it like nothing
+- Cut immediately after it. Nothing after. Script over.
+
+Story reply from her friend: "${hook}"
+
+Generate the script now. Start with **IMAGE 1**. Raw script only. Nothing else before or after it.`;
+}
+
+function _buildTypingPrompt() {
+  return `You are a viral social media script writer. Write fake Instagram DM loyalty test scripts. Output ONLY the raw script. No stage directions, no brackets, no commentary. Just the script.
+
+CRITICAL RULES:
+
+UNIQUENESS: Every script is its own world. Different man, different situation, different hook, different setting, different manipulation, different kill line, different everything.
+
+RHYTHM: Every line pulls the reader into the next. Each line drops a crumb, raises a question, or reveals something small. No filler.
+
+FORMAT:
+**IMAGE 1**
+2) STORY_REPLY:
+1) [Write the girlfriend's hook message to her friend. A varied test phrase + one specific suspicious thing she noticed. End with a single emoji 😐 🙃 🥺]
+2) [short punchy reaction — 1 to 3 words + 🫶]
+-b-
+**IMAGE 2**
+[her opener lines, each starting with 2)]
+[his response lines, each starting with 1)]
+-b-
+...and so on. End immediately after the kill line.
+
+FORMAT RULES:
+- EVERY single dialogue line MUST start with either 1) or 2). No exceptions.
+- No apostrophes ever. Write: hes / shes / doesnt / thats / im / ur / u / wouldnt / havent
+- No specific names for people. No specific city names. Keep everything universal.
+- 7 to 10 images total
+- 2 to 4 lines per image. Vary the count — never uniform
+- Every line SHORT. One thought. Max 8 words. Split longer thoughts across two lines.
+- Group his lines together, her lines together. Never strict 2)/1)/2)/1) alternation.
+- -b- on its own line between every image
+- Meme format: -m- then on the next line: Caption: "his exact words" emoji. ONE word in ALL CAPS. Max 5 words. Emoji after the closing quote, never inside it.
+- 3 to 4 memes total across the whole script. Mid-script only — never on the final image.
+- Script ends clean on his kill line. She does not respond after it.
+
+HIS CHARACTER:
+- Evasive, never explanatory. Drops crumbs, never the full picture.
+- Sounds like he is flirting and bragging — not confessing.
+- WRONG: "nobody gets hurt if nobody knows" — too direct
+- RIGHT: "depends" / "some things u just dont share" — short, vague, pulls her in
+
+HER CHARACTER:
+- Innocent and curious. Never interrogating.
+- Never references a girlfriend until AFTER he has mentioned someone himself.
+- Occasionally says "sir" alone on its own line when genuinely shocked.
+- Uses CAPS on one key word when reacting: "a SCHEDULE??" / "TWO years??"
+
+THE KILL LINE:
+- His final 1 to 3 lines. Casual. Devastating. Like it means nothing to him.
+- Always shows what SHE (the unaware partner) believes while completely clueless.
+- No meme. Hard cut after it.
+
+Output the raw script only. Start with **IMAGE 1**. No other text.`;
+}
+
+async function generateAIScript() {
+  const btn = document.getElementById('ai-gen-btn');
+  const status = document.getElementById('ai-gen-status');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = 'Generating...';
+  status.style.display = 'block';
+  status.textContent = 'Cooking up your script...';
+  try {
+    const prompt = _scriptType === 'slide' ? _buildSlidePrompt() : _buildTypingPrompt();
+    const resp = await fetch('/ai/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await resp.json();
+    const script = data.content?.[0]?.text || '';
+    if (!script) throw new Error('No script returned');
+    // Clean **IMAGE X** headers — not part of DM Studio format
+    const cleaned = script.replace(/\*\*IMAGE \d+\*\*\n?/g, '').trim();
+    const ta = document.getElementById('code-ta');
+    ta.value = cleaned;
+    parseCode();
+    switchTab('code');
+    status.textContent = '✓ Script generated!';
+    setTimeout(() => { status.style.display = 'none'; }, 2500);
+  } catch(e) {
+    status.textContent = '✗ ' + (e.message || 'Failed');
+    setTimeout(() => { status.style.display = 'none'; }, 3000);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
 function copyScript() {
   navigator.clipboard.writeText(document.getElementById('code-ta').value).then(()=>{
     const b=document.getElementById('copy-script-btn');
