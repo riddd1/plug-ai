@@ -2216,8 +2216,8 @@ async function sendToServer(frames, durations, audioFile, audioStart, audioEnd) 
   });
 
   if (!resp.ok) {
-    const txt = await resp.text().catch(() => 'unknown error');
-    throw new Error('Server error: ' + txt);
+    const txt = await resp.text().catch(() => '');
+    throw new Error(`Server error ${resp.status}: ${txt || '(empty response)'}`);
   }
 
   document.getElementById('loading-progress').textContent = 'Downloading video…';

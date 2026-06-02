@@ -21,4 +21,12 @@ app.use(express.static(staticDir, { index: false }));
 app.get('/', (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
 app.get('/scriptmaker', (req, res) => res.sendFile(path.join(staticDir, 'scriptmaker.html')));
 
+// Global error handler — ensures all errors return a readable body
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err.message);
+  if (!res.headersSent) {
+    res.status(err.status || 500).send(err.message || 'Internal server error');
+  }
+});
+
 app.listen(PORT, () => console.log(`DM Studio running on port ${PORT}`));
