@@ -1141,6 +1141,7 @@ function render() {
   // Count right-side messages for cross-conversation gradient
   const totalRight=messages.filter(m=>m.side==='right'&&m.type!=='batch_break'&&m.type!=='batch_meme').length;
   let rightIdx=0;
+  let firstMsg=true;
 
   document.getElementById('capture-root').style.background=bg;
   // Toggle light-mode class based on background luminance
@@ -1204,6 +1205,8 @@ function render() {
 
     const row=document.createElement('div');
     row.className=`ig-row ${m.side}`;
+    row.style.marginTop = prevSame ? '2px' : (firstMsg&&storySrc ? '2px' : '10px');
+    firstMsg=false;
 
     // Wrapper for reaction absolute positioning
     const bblWrap=document.createElement('div');
