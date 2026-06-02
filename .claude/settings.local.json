@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '{sum+=$1} END {print \"Total bytes:\", sum, \"Base64 size:\", int\\(sum*1.37/1024\\)\"KB\"}')",
+      "Bash(xargs stat *)",
+      "Bash(python3 *)",
+      "Bash(awk NR>=2251 && NR<=2410 *)",
+      "Bash(awk NR>=2540 && NR<=2620 *)",
+      "Bash(awk NR>=2410 && NR<=2540 *)",
+      "Bash(chmod +x *)",
+      "Bash(awk 'NR>=2284 && NR<=2330' \"/Users/ridwanoke/Desktop/fake ig ss/index.html\")",
+      "Bash(sed 's/data:.*$/[BASE64]/')",
+      "Bash(awk NR>=2320 && NR<=2520 *)",
+      "Bash(awk NR>=2327 && NR<=2330 *)",
+      "Bash(awk NR>=2327 && NR<=2475 *)",
+      "Bash(awk NR>=2571 && NR<=2680 *)",
+      "Bash(awk NR>=2715 && NR<=2740 *)",
+      "Bash(awk 'NR>1 {sum+=$5; count++} END {printf \"Total: %d files, %.1f MB raw → ~%.1f MB base64\\\\n\", count, sum/1048576, sum*1.34/1048576}')",
+      "Bash(awk NR>=1 && NR<=12 *)",
+      "Bash(git remote *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(rm -rf .git)",
+      "Bash(git init *)"
+    ]
+  }
+}
