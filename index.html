@@ -834,30 +834,14 @@ button,input,select,textarea{transition-property:background,border-color,color,b
 
 <script>
 // ── EMOJI PACK ──
-function _lookupEmoji(char) {
-  if (typeof EMOJI_PACK === 'undefined') return null;
+// Twemoji callback: converts hex icon to char, returns Apple PNG data-URL
+function _emojiSrc(icon) {
+  if (typeof EMOJI_PACK === 'undefined') return false;
+  const char = icon.split('-').map(c => String.fromCodePoint(parseInt(c, 16))).join('');
   return EMOJI_PACK[char]
       || EMOJI_PACK[char.replace(/️/g, '')]
       || EMOJI_PACK[char + '️']
-      || null;
-}
-function captureWithAppleEmoji(root, options) {
-  const swapped = [];
-  root.querySelectorAll('img.emoji').forEach(img => {
-    const src = _lookupEmoji(img.alt);
-    if (!src) return;
-    const rep = new Image();
-    rep.src = src;
-    rep.className = img.className;
-    rep.style.cssText = img.style.cssText;
-    img.parentNode.replaceChild(rep, img);
-    swapped.push({ rep, img });
-  });
-  return html2canvas(root, options).finally(() => {
-    swapped.forEach(({ rep, img }) => {
-      if (rep.parentNode) rep.parentNode.replaceChild(img, rep);
-    });
-  });
+      || false;
 }
 
 let storyPos = 'left';
@@ -1281,12 +1265,9 @@ function render() {
     container.appendChild(seenDiv);
   }
 
-  // Apply Twemoji
+  // Apply emoji — callback serves Apple PNG data-URLs from EMOJI_PACK
   if (typeof twemoji !== 'undefined') {
-    twemoji.parse(document.getElementById('capture-root'), {
-      folder:'svg', ext:'.svg',
-      base:'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/'
-    });
+    twemoji.parse(document.getElementById('capture-root'), { callback: _emojiSrc });
   }
 }
 
@@ -1381,7 +1362,7 @@ function confirmCrop() {
   const cropX=x-offX, cropY=y-offY;
 
   document.getElementById('loading').classList.add('show');
-  captureWithAppleEmoji(root,{scale:3,useCORS:true,allowTaint:true,backgroundColor:null,logging:false})
+  html2canvas(root,{scale:3,useCORS:true,allowTaint:true,backgroundColor:null,logging:false})
   .then(canvas=>{
     const scale=3;
     const out=document.createElement('canvas');
@@ -1512,7 +1493,7 @@ function doRangeDownload() {
   if (cropH <= 0) return;
 
   document.getElementById('loading').classList.add('show');
-  captureWithAppleEmoji(root, {scale:3, useCORS:true, allowTaint:true, backgroundColor:null, logging:false})
+  html2canvas(root, {scale:3, useCORS:true, allowTaint:true, backgroundColor:null, logging:false})
   .then(canvas => {
     const scale = 3;
     const sy = Math.round(topPx * scale);
@@ -1818,7 +1799,7 @@ async function generateSlideshow() {
         domMap[item.id].el.style.display = domMap[item.id].nat;
         batchVisible.push(item.id);
         await new Promise(r => setTimeout(r, 150));
-        const canvas = await captureWithAppleEmoji(root, {scale:captureScale, useCORS:true, allowTaint:true, backgroundColor:bgColor, logging:false});
+        const canvas = await html2canvas(root, {scale:captureScale, useCORS:true, allowTaint:true, backgroundColor:bgColor, logging:false});
         frames.push(canvas); durations.push(item.timing || 0.8);
       }
     }
