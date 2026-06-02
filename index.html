@@ -1837,7 +1837,7 @@ async function generateSlideshow() {
   } catch (err) {
     Object.values(domMap).forEach(({el}) => { el.style.display = ''; });
     console.error(err);
-    alert('Failed to generate slideshow. Please try Chrome or Edge.');
+    alert('Failed to generate slideshow: ' + (err.message || err));
   }
 
   document.getElementById('loading').classList.remove('show');

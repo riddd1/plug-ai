@@ -1,0 +1,9 @@
+backend/node_modules
+.git
+.DS_Store
+auddio/
+meme/
+femal images/
+hooks images/
+*.ttc
+*.command
