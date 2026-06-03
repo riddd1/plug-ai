@@ -731,6 +731,10 @@ button,input,select,textarea{transition-property:background,border-color,color,b
           </label>
           <input class="fi" id="seen-text" value="Seen just now" oninput="render()" placeholder="e.g. Seen just now, Seen · 2m...">
         </div>
+        <label class="toggle-row" style="margin-top:6px">
+          <input type="checkbox" id="bar-chk" checked onchange="document.getElementById('ig-input-bar').style.display=this.checked?'':'none'">
+          <span>Show message bar</span>
+        </label>
       </div>
 
 
@@ -3270,7 +3274,7 @@ async function generateTypingVideo(){
       <label for="tv-keyboard" style="font-size:11px;color:rgba(255,255,255,0.6);cursor:pointer">Show keyboard at bottom</label>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
-      <input type="checkbox" id="tv-show-bar" checked style="accent-color:#10b981;width:14px;height:14px">
+      <input type="checkbox" id="tv-show-bar" checked style="accent-color:#10b981;width:14px;height:14px" onchange="const b=document.getElementById('bar-chk');if(b)b.checked=this.checked;const bar=document.getElementById('ig-input-bar');if(bar)bar.style.display=this.checked?'':'none'">
       <label for="tv-show-bar" style="font-size:11px;color:rgba(255,255,255,0.6);cursor:pointer">Show message bar</label>
     </div>
 
