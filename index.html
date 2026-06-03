@@ -2794,141 +2794,225 @@ function showToast(msg) {
 })();
 
 // ══════════════════════════════════════════════════════════════════════
-// ── TYPING VIDEO ──
+// ── TYPING VIDEO v2 ──
 // ══════════════════════════════════════════════════════════════════════
 let _tvSpeed = 2, _tvPause = 1;
 
-function openTypingVideoModal() {
-  document.getElementById('typing-video-modal').classList.add('show');
-}
-function closeTypingVideoModal() {
-  document.getElementById('typing-video-modal').classList.remove('show');
-}
-function tvSetSpeed(v) {
-  _tvSpeed = v;
-  document.querySelectorAll('[data-speed]').forEach(b => b.classList.toggle('on', parseFloat(b.dataset.speed) === v));
-}
-function tvSetPause(v) {
-  _tvPause = v;
-  document.querySelectorAll('[data-pause]').forEach(b => b.classList.toggle('on', parseFloat(b.dataset.pause) === v));
-}
+function openTypingVideoModal() { document.getElementById('typing-video-modal').classList.add('show'); }
+function closeTypingVideoModal() { document.getElementById('typing-video-modal').classList.remove('show'); }
+function tvSetSpeed(v) { _tvSpeed=v; document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('on',parseFloat(b.dataset.speed)===v)); }
+function tvSetPause(v) { _tvPause=v; document.querySelectorAll('[data-pause]').forEach(b=>b.classList.toggle('on',parseFloat(b.dataset.pause)===v)); }
 
-function _tvRR(ctx, x, y, w, h, r, color) {
+function _tvRR(ctx,x,y,w,h,r,color){
   ctx.beginPath();
-  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
-  ctx.closePath(); ctx.fillStyle=color; ctx.fill();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();ctx.fillStyle=color;ctx.fill();
 }
 
-function _tvWrap(ctx, text, maxW) {
-  const words = text.split(' ');
-  const lines = []; let line = '';
-  for (const w of words) {
-    const t = line ? line+' '+w : w;
-    if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; }
-    else line = t;
-  }
-  if (line) lines.push(line);
-  return lines.length ? lines : [''];
+function _tvWrap(ctx,text,maxW){
+  const words=text.split(' ');const lines=[];let line='';
+  for(const w of words){const t=line?line+' '+w:w;if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t;}
+  if(line)lines.push(line);return lines.length?lines:[''];
 }
 
-function _tvFrame(ctx, W, H, visMsgs, typing, title, showKbd, rightColor) {
-  const S = W / 390;
-  ctx.fillStyle = '#000'; ctx.fillRect(0,0,W,H);
+function _tvDrawBubble(ctx,W,S,msg,y,MARG,rightColor,visMsgs,idx){
+  const FS=19*S,LH=26*S,PX=14*S,PY=10*S,MAXW=270*S,RAD=20*S;
+  ctx.font=`${FS}px 'Apple Color Emoji','Segoe UI Emoji',system-ui,sans-serif`;
+  if(!msg.text)return 0;
+  const isR=msg.side==='right';
+  const prevSame=idx>0&&visMsgs[idx-1]&&visMsgs[idx-1].side===msg.side;
+  const nextSame=idx<visMsgs.length-1&&visMsgs[idx+1]&&visMsgs[idx+1].side===msg.side;
+  const lines=_tvWrap(ctx,msg.text,MAXW-PX*2);
+  const bw=Math.min(Math.max(...lines.map(l=>ctx.measureText(l).width))+PX*2,MAXW);
+  const bh=lines.length*LH+PY*2;
+  const bx=isR?W-MARG-bw:MARG;
+  const rl=isR?RAD:(prevSame?5*S:RAD),rr=isR?(prevSame?5*S:RAD):RAD;
+  const br=isR?(nextSame?5*S:RAD):RAD,bl=isR?RAD:(nextSame?5*S:RAD);
+  ctx.beginPath();
+  ctx.moveTo(bx+rl,y);ctx.lineTo(bx+bw-rr,y);ctx.quadraticCurveTo(bx+bw,y,bx+bw,y+rr);
+  ctx.lineTo(bx+bw,y+bh-br);ctx.quadraticCurveTo(bx+bw,y+bh,bx+bw-br,y+bh);
+  ctx.lineTo(bx+bl,y+bh);ctx.quadraticCurveTo(bx,y+bh,bx,y+bh-bl);
+  ctx.lineTo(bx,y+rl);ctx.quadraticCurveTo(bx,y,bx+rl,y);
+  ctx.closePath();ctx.fillStyle=isR?(rightColor||'#7c5cbf'):'#262626';ctx.fill();
+  ctx.fillStyle='#fff';ctx.textAlign=isR?'right':'left';
+  for(let l=0;l<lines.length;l++) ctx.fillText(lines[l],isR?bx+bw-PX:bx+PX,y+PY+(l+0.8)*LH);
+  return bh;
+}
 
-  let y = 50*S;
-
-  // Caption
-  if (title) {
-    ctx.font = `bold ${44*S}px system-ui,-apple-system,sans-serif`;
-    ctx.fillStyle = '#fff'; ctx.textAlign = 'left';
-    const tLines = _tvWrap(ctx, title, W - 40*S);
-    for (const l of tLines) { ctx.fillText(l, 20*S, y); y += 54*S; }
-    y += 16*S;
-  }
-
-  // Messages
-  const FS = 19*S, LH = 26*S, PX = 14*S, PY = 10*S;
-  const MAXW = 280*S, MARG = 12*S, RAD = 20*S;
-  ctx.font = `${FS}px system-ui,-apple-system,sans-serif`;
-
-  for (const msg of visMsgs) {
-    if (!msg.text) continue;
-    const lines = _tvWrap(ctx, msg.text, MAXW - PX*2);
-    let bw = Math.min(Math.max(...lines.map(l => ctx.measureText(l).width)) + PX*2, MAXW);
-    const bh = lines.length*LH + PY*2;
-    const isR = msg.side === 'right';
-    const bx = isR ? W-MARG-bw : MARG;
-    _tvRR(ctx, bx, y, bw, bh, RAD, isR ? (rightColor||'#7c5cbf') : '#262626');
-    ctx.fillStyle = '#fff'; ctx.textAlign = isR ? 'right' : 'left';
-    for (let i=0; i<lines.length; i++) {
-      ctx.fillText(lines[i], isR ? bx+bw-PX : bx+PX, y+PY+(i+0.8)*LH);
-    }
-    y += bh + 4*S;
-  }
-
-  // Typing dots
-  if (typing.show) {
-    const bw=72*S, bh=44*S, isR=typing.side==='right';
-    const bx = isR ? W-MARG-bw : MARG;
-    _tvRR(ctx, bx, y, bw, bh, RAD, '#262626');
-    const cy=y+bh/2, cx0=bx+bw/2-12*S;
-    for (let d=0; d<3; d++) {
-      const dp=((typing.phase||0) - d*120 + 720)%360;
-      const bob = -Math.max(0,Math.sin(dp*Math.PI/180))*5*S;
-      ctx.beginPath(); ctx.arc(cx0+d*12*S, cy+bob, 5*S, 0, Math.PI*2);
-      ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.fill();
-    }
-  }
-
-  // Keyboard
-  if (showKbd) {
-    const kh = 260*S, ky = H-kh;
-    ctx.fillStyle='#1c1c1e'; ctx.fillRect(0,ky,W,kh);
-    ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.fillRect(0,ky,W,1);
-    // Message bar
-    const barH=42*S, barY=ky-barH-8*S;
-    _tvRR(ctx,MARG,barY,W-MARG*2,barH,barH/2,'#1c1c1e');
-    ctx.fillStyle='rgba(255,255,255,0.25)'; ctx.font=`${14*S}px system-ui`;
-    ctx.textAlign='left'; ctx.fillText('Message…', MARG+16*S, barY+barH*0.65);
-    // Key rows
-    const rows=[['q','w','e','r','t','y','u','i','o','p'],
-                ['a','s','d','f','g','h','j','k','l'],
-                ['z','x','c','v','b','n','m']];
-    const kw=34*S, kkey_h=42*S, kgap=6*S, ky0=ky+10*S;
-    ctx.font=`${16*S}px system-ui,-apple-system,sans-serif`;
-    ctx.fillStyle='#fff'; ctx.textAlign='center';
-    for (let r=0; r<rows.length; r++) {
-      const row=rows[r], tw=row.length*(kw+kgap)-kgap;
-      const startX=(W-tw)/2;
-      for (let c=0; c<row.length; c++) {
-        const kx=startX+c*(kw+kgap), kky=ky0+r*(kkey_h+kgap);
-        _tvRR(ctx,kx,kky,kw,kkey_h,6*S,'#363638');
-        ctx.fillText(row[c].toUpperCase(),kx+kw/2,kky+kkey_h*0.68);
-      }
-    }
+function _tvDrawIGBar(ctx,W,S,barY,barH,inputText){
+  const MARG=14*S;
+  if(inputText!==null){
+    const sendW=52*S,sendH=36*S,inputH=46*S;
+    const inputW=W-MARG*2-sendW-10*S;
+    _tvRR(ctx,MARG,barY+(barH-inputH)/2,inputW,inputH,inputH/2,'#1c1c1e');
+    ctx.font=`${16*S}px 'Apple Color Emoji','Segoe UI Emoji',system-ui,sans-serif`;
+    ctx.fillStyle='#fff';ctx.textAlign='left';
+    ctx.fillText(inputText+'|',MARG+14*S,barY+barH*0.62);
+    const sx=MARG+inputW+10*S,sy=barY+(barH-sendH)/2;
+    _tvRR(ctx,sx,sy,sendW,sendH,sendH/2,'#7c5cbf');
+    ctx.fillStyle='#fff';ctx.font=`bold ${20*S}px system-ui`;ctx.textAlign='center';
+    ctx.fillText('↑',sx+sendW/2,sy+sendH*0.72);
+  } else {
+    const barW=W-MARG*2,barH2=50*S;
+    _tvRR(ctx,MARG,barY+(barH-barH2)/2,barW,barH2,barH2/2,'#1c1c1e');
+    const camR=18*S,camCx=MARG+14*S+camR,camCy=barY+barH/2;
+    const grad=ctx.createRadialGradient(camCx-4,camCy-4,2,camCx,camCy,camR);
+    grad.addColorStop(0,'#8134AF');grad.addColorStop(1,'#DD2A7B');
+    ctx.beginPath();ctx.arc(camCx,camCy,camR,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();
+    ctx.fillStyle='#fff';ctx.font=`${16*S}px system-ui`;ctx.textAlign='center';
+    ctx.fillText('📷',camCx,camCy+6*S);
+    ctx.font=`${16*S}px system-ui,sans-serif`;ctx.fillStyle='rgba(255,255,255,0.38)';ctx.textAlign='left';
+    ctx.fillText('Message...',MARG+14*S+camR*2+10*S,barY+barH*0.62);
+    let ix=W-MARG-10*S;
+    const iData=[
+      {t:'circle+'},
+      {t:'rect'},
+      {t:'smile'},
+      {t:'mic'}
+    ];
+    const icSz=18*S,icGap=28*S,icCy=barY+barH/2;
+    ctx.strokeStyle='rgba(255,255,255,0.75)';ctx.lineWidth=1.5*S;
+    // + circle
+    ctx.beginPath();ctx.arc(ix,icCy,icSz*0.55,0,Math.PI*2);ctx.stroke();
+    ctx.font=`bold ${13*S}px system-ui`;ctx.fillStyle='rgba(255,255,255,0.75)';ctx.textAlign='center';
+    ctx.fillText('+',ix,icCy+5*S);ix-=icGap;
+    // sticker (rounded square with smile)
+    ctx.beginPath();
+    ctx.moveTo(ix-icSz*0.5+4*S,icCy-icSz*0.5);
+    ctx.arcTo(ix+icSz*0.5,icCy-icSz*0.5,ix+icSz*0.5,icCy+icSz*0.5,4*S);
+    ctx.arcTo(ix+icSz*0.5,icCy+icSz*0.5,ix-icSz*0.5,icCy+icSz*0.5,4*S);
+    ctx.arcTo(ix-icSz*0.5,icCy+icSz*0.5,ix-icSz*0.5,icCy-icSz*0.5,4*S);
+    ctx.arcTo(ix-icSz*0.5,icCy-icSz*0.5,ix+icSz*0.5,icCy-icSz*0.5,4*S);
+    ctx.closePath();ctx.stroke();ix-=icGap;
+    // gallery (mountain icon)
+    ctx.beginPath();
+    ctx.moveTo(ix-icSz*0.5,icCy-icSz*0.5);
+    ctx.lineTo(ix+icSz*0.5,icCy-icSz*0.5);ctx.lineTo(ix+icSz*0.5,icCy+icSz*0.5);
+    ctx.lineTo(ix-icSz*0.5,icCy+icSz*0.5);ctx.closePath();ctx.stroke();ix-=icGap;
+    // mic
+    ctx.beginPath();ctx.arc(ix,icCy-5*S,5*S,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.arc(ix,icCy-5*S,9*S,0,Math.PI);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(ix,icCy+4*S);ctx.lineTo(ix,icCy+9*S);ctx.stroke();
   }
 }
 
-async function generateTypingVideo() {
-  const title = document.getElementById('tv-title').value.trim();
-  const showKbd = document.getElementById('tv-keyboard').checked;
-  const msgs = messages.filter(m => m.type!=='batch_break' && m.type!=='batch_meme' && m.text);
-  if (!msgs.length) { alert('Add messages in the builder first'); return; }
+function _tvDrawKeyboard(ctx,W,H,S,ky,inputText){
+  ctx.fillStyle='#1c1c1e';ctx.fillRect(0,ky,W,H-ky);
+  ctx.fillStyle='rgba(255,255,255,0.06)';ctx.fillRect(0,ky,W,1);
+  const MARG=5*S;
+  const acH=44*S;
+  ctx.fillStyle='#2c2c2e';ctx.fillRect(0,ky,W,acH);
+  const lastWord=inputText?inputText.split(' ').pop():'';
+  const acWords=[lastWord?'"'+lastWord+'"':'',lastWord||'the','I'];
+  const acW=W/3;
+  ctx.font=`${14*S}px system-ui,sans-serif`;ctx.fillStyle='rgba(255,255,255,0.8)';ctx.textAlign='center';
+  for(let i=0;i<3;i++){
+    ctx.fillText(acWords[i]||'',acW*(i+0.5),ky+acH*0.65);
+    if(i<2){ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fillRect(acW*(i+1),ky+8*S,1,acH-16*S);ctx.fillStyle='rgba(255,255,255,0.8)';}
+  }
+  const ky0=ky+acH+8*S;
+  const rows=[['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['⇧','z','x','c','v','b','n','m','⌫']];
+  const kgap=5*S,kh=44*S,kw=(W-MARG*2-9*kgap)/10;
+  for(let r=0;r<rows.length;r++){
+    const row=rows[r];const tw=row.length*(kw+kgap)-kgap;const sx=(W-tw)/2;
+    for(let c=0;c<row.length;c++){
+      const kx=sx+c*(kw+kgap),kky=ky0+r*(kh+kgap);
+      const sp=row[c]==='⇧'||row[c]==='⌫';
+      _tvRR(ctx,kx,kky,kw,kh,6*S,sp?'#505052':'#363638');
+      ctx.fillStyle='rgba(255,255,255,0.92)';
+      ctx.font=`${sp?13*S:17*S}px system-ui,-apple-system,sans-serif`;
+      ctx.textAlign='center';ctx.fillText(row[c],kx+kw/2,kky+kh*0.68);
+    }
+  }
+  const br=ky0+3*(kh+kgap);
+  const bkw=kw*2+kgap,spW=W-MARG*2-bkw*2-kgap*2;
+  _tvRR(ctx,MARG,br,bkw,kh,6*S,'#505052');
+  ctx.fillStyle='rgba(255,255,255,0.85)';ctx.font=`${13*S}px system-ui`;ctx.textAlign='center';
+  ctx.fillText('123',MARG+bkw/2,br+kh*0.68);
+  _tvRR(ctx,MARG+bkw+kgap,br,spW,kh,6*S,'#636366');
+  _tvRR(ctx,MARG+bkw+kgap+spW+kgap,br,bkw,kh,6*S,'#505052');
+  ctx.fillText('return',MARG+bkw+kgap+spW+kgap+bkw/2,br+kh*0.68);
+  const botY=br+kh+6*S;
+  ctx.font=`${20*S}px system-ui,sans-serif`;ctx.fillStyle='rgba(255,255,255,0.6)';
+  ctx.textAlign='center';ctx.fillText('😀',MARG+20*S,botY+22*S);
+  ctx.fillText('🎙',W-MARG-20*S,botY+22*S);
+}
 
-  const btn=document.getElementById('tv-gen-btn'), status=document.getElementById('tv-status');
-  btn.disabled=true; btn.textContent='Recording…';
-  status.style.display='block'; status.textContent='Setting up…';
+function _tvFullFrame(ctx,W,H,state){
+  const {visMsgs,inputText,typingDots,title,showKbd,rightColor,seenText,showDelivered}=state;
+  const S=W/390;
+  const KBD_H=showKbd?320*S:0;
+  const BAR_H=66*S;
+  const BAR_Y=H-KBD_H-BAR_H-6*S;
 
-  const W=1080, H=1920, FPS=30;
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+
+  let y=70*S;
+  if(title){
+    ctx.font=`bold ${40*S}px 'Apple Color Emoji','Segoe UI Emoji',system-ui,sans-serif`;
+    ctx.fillStyle='#fff';ctx.textAlign='left';
+    const tl=_tvWrap(ctx,title,W-40*S);
+    for(const l of tl){ctx.fillText(l,20*S,y);y+=50*S;}
+    y+=14*S;
+  }
+
+  const MARG=14*S;
+  for(let i=0;i<visMsgs.length;i++){
+    const msg=visMsgs[i];
+    if(!msg.text)continue;
+    const prevSame=i>0&&visMsgs[i-1].side===msg.side;
+    const bh=_tvDrawBubble(ctx,W,S,msg,y,MARG,rightColor,visMsgs,i);
+    y+=bh+(prevSame?3:10)*S;
+  }
+
+  if(typingDots&&typingDots.show){
+    const bw=70*S,bh=42*S,isR=typingDots.side==='right';
+    const bx=isR?W-MARG-bw:MARG;
+    _tvRR(ctx,bx,y,bw,bh,20*S,'#262626');
+    const cy=y+bh/2,cx0=bx+bw/2-11*S;
+    for(let d=0;d<3;d++){
+      const dp=((typingDots.phase||0)-d*120+720)%360;
+      const bob=-Math.max(0,Math.sin(dp*Math.PI/180))*5*S;
+      ctx.beginPath();ctx.arc(cx0+d*11*S,cy+bob,4.5*S,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.7)';ctx.fill();
+    }
+  }
+
+  if(showDelivered&&visMsgs.length>0){
+    ctx.font=`${12*S}px system-ui,sans-serif`;ctx.fillStyle='rgba(255,255,255,0.4)';ctx.textAlign='right';
+    ctx.fillText('Delivered',W-MARG,y+2*S);
+  }
+  if(seenText&&visMsgs.length>0){
+    ctx.font=`${12*S}px system-ui,sans-serif`;ctx.fillStyle='rgba(255,255,255,0.4)';ctx.textAlign='right';
+    ctx.fillText(seenText,W-MARG,y+2*S);
+  }
+
+  _tvDrawIGBar(ctx,W,S,BAR_Y,BAR_H,inputText);
+  if(showKbd)_tvDrawKeyboard(ctx,W,H,S,H-KBD_H,inputText);
+}
+
+async function generateTypingVideo(){
+  const title=document.getElementById('tv-title').value.trim();
+  const showKbd=document.getElementById('tv-keyboard').checked;
+  const msgs=messages.filter(m=>m.type!=='batch_break'&&m.type!=='batch_meme'&&m.text);
+  if(!msgs.length){alert('Add messages in the builder first');return;}
+
+  const seenChk=document.getElementById('seen-chk');
+  const seenTxtEl=document.getElementById('seen-text');
+  const seenText=(seenChk&&seenChk.checked&&seenTxtEl)?seenTxtEl.value.trim():'';
+
+  const btn=document.getElementById('tv-gen-btn'),status=document.getElementById('tv-status');
+  btn.disabled=true;btn.textContent='Recording…';
+  status.style.display='block';status.textContent='Setting up…';
+
+  const W=1080,H=1920,FPS=30;
   const canvas=document.createElement('canvas');
-  canvas.width=W; canvas.height=H;
+  canvas.width=W;canvas.height=H;
   const ctx=canvas.getContext('2d');
-
-  // Use DM builder's right bubble color
-  const rightColor = document.getElementById('c-r1')?.value || '#7c5cbf';
+  const rightColor=document.getElementById('c-r1')?.value||'#7c5cbf';
 
   const mimeTypes=['video/mp4;codecs=avc1.42E01E','video/mp4','video/webm;codecs=vp9','video/webm'];
   const mimeType=mimeTypes.find(mt=>{try{return MediaRecorder.isTypeSupported(mt);}catch(e){return false;}})||'video/webm';
@@ -2943,41 +3027,60 @@ async function generateTypingVideo() {
     const blob=new Blob(chunks,{type:mimeType});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
-    a.href=url; a.download=`ig-typing-video.${ext}`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    a.href=url;a.download=`ig-typing-video.${ext}`;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
     setTimeout(()=>URL.revokeObjectURL(url),3000);
-    btn.disabled=false; btn.textContent='🎬 Generate Video';
+    btn.disabled=false;btn.textContent='🎬 Generate Video';
     status.style.display='none';
     closeTypingVideoModal();
   };
 
   const visible=[];
-  _tvFrame(ctx,W,H,visible,{show:false},title,showKbd,rightColor);
-  recorder.start();
-  await new Promise(r=>setTimeout(r,400));
+  const base=()=>({visMsgs:visible,inputText:null,typingDots:{show:false},title,showKbd,rightColor,seenText:'',showDelivered:false});
 
-  for (let i=0; i<msgs.length; i++) {
+  _tvFullFrame(ctx,W,H,base());
+  recorder.start();
+  await new Promise(r=>setTimeout(r,500));
+
+  for(let i=0;i<msgs.length;i++){
+    const msg=msgs[i];
     status.textContent=`Message ${i+1} / ${msgs.length}…`;
-    // Typing animation
+
+    // Phase 1: dots (0.7s)
     await new Promise(resolve=>{
-      const start=Date.now(); let raf;
+      const start=Date.now();let raf;
       function tick(){
         const ms=Date.now()-start;
-        _tvFrame(ctx,W,H,visible,{show:true,side:msgs[i].side,phase:(ms/1000)*280},title,showKbd,rightColor);
-        if(ms<_tvSpeed*1000){raf=requestAnimationFrame(tick);}
-        else{cancelAnimationFrame(raf);resolve();}
+        _tvFullFrame(ctx,W,H,{...base(),typingDots:{show:true,side:msg.side,phase:(ms/700)*360}});
+        if(ms<700)raf=requestAnimationFrame(tick);else{cancelAnimationFrame(raf);resolve();}
       }
       tick();
     });
-    // Reveal message
-    visible.push(msgs[i]);
-    _tvFrame(ctx,W,H,visible,{show:false},title,showKbd,rightColor);
+
+    // Phase 2: type chars
+    const text=msg.text;
+    const msPerChar=Math.max(35,(_tvSpeed*900)/Math.max(text.length,1));
+    for(let c=1;c<=text.length;c++){
+      _tvFullFrame(ctx,W,H,{...base(),inputText:text.slice(0,c),typingDots:{show:false}});
+      await new Promise(r=>setTimeout(r,msPerChar));
+    }
+
+    // Phase 3: send
+    visible.push(msg);
+    const isLast=i===msgs.length-1;
+    _tvFullFrame(ctx,W,H,{...base(),inputText:null,showDelivered:isLast&&!seenText});
     await new Promise(r=>setTimeout(r,_tvPause*1000));
   }
 
-  await new Promise(r=>setTimeout(r,1200));
+  if(seenText){
+    _tvFullFrame(ctx,W,H,{...base(),seenText,showDelivered:false});
+    await new Promise(r=>setTimeout(r,1500));
+  }
+
+  await new Promise(r=>setTimeout(r,700));
   recorder.stop();
 }
+
 </script>
 
 <!-- TYPING VIDEO MODAL -->
