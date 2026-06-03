@@ -2879,30 +2879,34 @@ function _tvDrawBubble(ctx,W,S,msg,y,MARG,rightColor,visMsgs,idx){
 function _tvDrawIGBar(ctx,W,S,barY,barH,inputText){
   const MARG=14*S;
   if(inputText!==null){
-    const btnH=46*S,bY=barY+(barH-btnH)/2,gap=8*S;
-    // Left: dark pill with search/magnifier icon
-    const searchW=46*S;
-    _tvRR(ctx,MARG,bY,searchW,btnH,btnH/2,'#1c1c1e');
-    ctx.strokeStyle='rgba(255,255,255,0.75)';ctx.lineWidth=2*S;ctx.lineCap='round';
-    const scx=MARG+searchW*0.43,scy=bY+btnH*0.43,sr=btnH*0.16;
-    ctx.beginPath();ctx.arc(scx,scy,sr,0,Math.PI*2);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(scx+sr*0.72,scy+sr*0.72);ctx.lineTo(MARG+searchW*0.7,bY+btnH*0.7);ctx.stroke();
-    // Right: purple pill with send arrow
-    const sendW=52*S,sx=W-MARG-sendW;
-    _tvRR(ctx,sx,bY,sendW,btnH,btnH/2,'#8134AF');
-    ctx.save();ctx.translate(sx+sendW/2,bY+btnH/2);
-    ctx.fillStyle='#fff';
-    ctx.beginPath();ctx.moveTo(9*S,-1*S);ctx.lineTo(-5*S,-8*S);ctx.lineTo(-3*S,-1*S);ctx.lineTo(-5*S,6*S);ctx.closePath();ctx.fill();
-    ctx.restore();
-    // Center: dark input pill with text + purple cursor
-    const inputX=MARG+searchW+gap,inputW=sx-gap-inputX;
-    _tvRR(ctx,inputX,bY,inputW,btnH,btnH/2,'#1c1c1e');
+    const btnH=46*S,bY=barY+(barH-btnH)/2;
+    const sendW=56*S,gap=10*S,sx=W-MARG-sendW;
+    // Single dark pill: magnifier icon + typed text
+    _tvRR(ctx,MARG,bY,sx-gap-MARG,btnH,btnH/2,'#1c1c1e');
+    // Magnifier icon (Q-shape) inside pill
+    const mCx=MARG+btnH*0.52,mCy=bY+btnH*0.5,mR=btnH*0.165;
+    ctx.strokeStyle='rgba(255,255,255,0.78)';ctx.lineWidth=2.2*S;ctx.lineCap='round';
+    ctx.beginPath();ctx.arc(mCx,mCy,mR,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(mCx+mR*0.72,mCy+mR*0.72);ctx.lineTo(mCx+mR*1.52,mCy+mR*1.52);ctx.stroke();
+    // Typed text + cursor
     ctx.font=`${16*S}px 'Apple Color Emoji','Segoe UI Emoji',system-ui,sans-serif`;
     ctx.fillStyle='#fff';ctx.textAlign='left';
-    const tx=inputX+14*S,ty=bY+btnH*0.63;
+    const tx=MARG+btnH*1.08,ty=bY+btnH*0.63;
     ctx.fillText(inputText,tx,ty);
     const tw=ctx.measureText(inputText).width;
-    ctx.fillStyle='#8134AF';ctx.fillRect(tx+tw+1*S,bY+btnH*0.2,2*S,btnH*0.6);
+    ctx.fillStyle='#8134AF';ctx.fillRect(tx+tw+2*S,bY+btnH*0.2,2.5*S,btnH*0.6);
+    // Purple send pill with paper plane icon
+    _tvRR(ctx,sx,bY,sendW,btnH,btnH/2,'#8134AF');
+    ctx.save();ctx.translate(sx+sendW*0.5,bY+btnH*0.5);
+    const pSz=btnH*0.32;
+    ctx.fillStyle='#fff';
+    ctx.beginPath();
+    ctx.moveTo(pSz,0);
+    ctx.lineTo(-pSz*0.42,-pSz*0.82);
+    ctx.lineTo(-pSz*0.14,0);
+    ctx.lineTo(-pSz*0.42,pSz*0.82);
+    ctx.closePath();ctx.fill();
+    ctx.restore();
   } else {
     const barW=W-MARG*2,barH2=50*S;
     _tvRR(ctx,MARG,barY+(barH-barH2)/2,barW,barH2,barH2/2,'#1c1c1e');
@@ -3117,20 +3121,21 @@ async function generateTypingVideo(){
   canvas.width=W;canvas.height=H;
   const ctx=canvas.getContext('2d');
 
-  function drawFrame(capIdx,inputText,dots){
+  function drawFrame(capIdx,inputText,dots,showBar=true){
     ctx.fillStyle=bgColor;ctx.fillRect(0,0,W,H);
     const cap=captures[capIdx];
-    // Bottom-anchor: messages+bar sit at the bottom of the frame
+    const MARG=14*S,bw=70*S,bh=42*S;
+    // Shift capture up when dots are showing to make room below last message
+    const dotShift=(dots&&dots.show)?(bh+10*S):0;
     if(cap){
-      const capY=Math.max(0,H-KBD_H-cap.height);
+      const capY=Math.max(0,H-KBD_H-cap.height)-dotShift;
       ctx.drawImage(cap,0,capY);
     }
     if(dots&&dots.show){
-      const MARG=14*S,bw=70*S,bh=42*S;
+      // Dots always on LEFT side (other person typing)
       const dy=BAR_Y-bh-6*S;
-      const bx=dots.side==='right'?W-MARG-bw:MARG;
-      _tvRR(ctx,bx,dy,bw,bh,20*S,'#262626');
-      const cy=dy+bh/2,cx0=bx+bw/2-11*S;
+      _tvRR(ctx,MARG,dy,bw,bh,20*S,'#262626');
+      const cy=dy+bh/2,cx0=MARG+bw/2-11*S;
       for(let d=0;d<3;d++){
         const dp=((dots.phase||0)-d*120+720)%360;
         const bob=-Math.max(0,Math.sin(dp*Math.PI/180))*5*S;
@@ -3138,8 +3143,8 @@ async function generateTypingVideo(){
         ctx.fillStyle='rgba(255,255,255,0.7)';ctx.fill();
       }
     }
-    // Idle: bar is already in the capture. Typing: overlay canvas bar on top.
-    if(inputText!==null){
+    // Idle: bar comes from capture. Typing (right side): overlay canvas bar on top.
+    if(inputText!==null&&showBar){
       ctx.fillStyle=bgColor;ctx.fillRect(0,BAR_Y,W,BAR_H);
       _tvDrawIGBar(ctx,W,S,BAR_Y,BAR_H,inputText);
     }
@@ -3175,24 +3180,34 @@ async function generateTypingVideo(){
   for(let i=1;i<msgs.length;i++){
     const msg=msgs[i];
     status.textContent=`Message ${i+1}/${msgs.length}…`;
-    // dots
-    await new Promise(resolve=>{
-      const start=Date.now();let raf;
-      function tick(){
-        const ms=Date.now()-start;
-        drawFrame(i,null,{show:true,side:msg.side,phase:(ms/700)*360});
-        if(ms<700)raf=requestAnimationFrame(tick);else{cancelAnimationFrame(raf);resolve();}
-      }
-      tick();
-    });
-    // type chars
+    const isLeft=msg.side==='left';
     const text=msg.text;
     const mpc=Math.max(35,(_tvSpeed*900)/Math.max(text.length,1));
-    for(let c=1;c<=text.length;c++){
-      drawFrame(i,text.slice(0,c),null);
-      await new Promise(r=>setTimeout(r,mpc));
+
+    if(isLeft){
+      // Left message: show dots (other person typing) then chars appear without bar
+      await new Promise(resolve=>{
+        const start=Date.now();let raf;
+        function tick(){
+          const ms=Date.now()-start;
+          drawFrame(i,null,{show:true,phase:(ms/700)*360});
+          if(ms<800)raf=requestAnimationFrame(tick);else{cancelAnimationFrame(raf);resolve();}
+        }
+        tick();
+      });
+      // Type chars without showing the typing bar
+      for(let c=1;c<=text.length;c++){
+        drawFrame(i,text.slice(0,c),null,false);
+        await new Promise(r=>setTimeout(r,mpc));
+      }
+    } else {
+      // Right message: no dots, show typing bar with chars
+      for(let c=1;c<=text.length;c++){
+        drawFrame(i,text.slice(0,c),null,true);
+        await new Promise(r=>setTimeout(r,mpc));
+      }
     }
-    // send
+    // message sent
     drawFrame(i+1,null,null);
     await new Promise(r=>setTimeout(r,_tvPause*1000));
   }
