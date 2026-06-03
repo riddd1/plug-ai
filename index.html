@@ -1336,60 +1336,167 @@ function selectScriptType(type) {
   });
 }
 
-function _buildSlidePrompt() {
-  const hooks = ["test him pls he deleted his instagram search history 😐","test him pls his location is always off now 😐","test him pls he started caring about how he looks when he goes out alone 🙃","test him pls he gets defensive when i ask simple questions 😐","test him pls he came home with a hickey and said it was from a seatbelt 🙃","test him pls he has a contact saved as a man's name but the texts come in at 2am 😐","test him pls he started tilting his phone away when i walk past 🙃","test him pls he cleared his call log for the first time ever 😐","test him pls he goes out every other weekend and never says where 🙃","test him pls he has a second instagram i wasn't supposed to find 😐","test him pls he bought new cologne and hides it in his car 🙃","test him pls he started deleting his messages every night before bed 😐","test him pls his ring finger has a tan line and he says it's from a ring he lost 🙃"];
-  const hook = hooks[Math.floor(Math.random()*hooks.length)];
-  return `You are a viral social media script writer. You write fake Instagram DM loyalty test scripts where a girl (the tester) slides into a guy's DMs pretending to be a stranger, and through casual innocent conversation he slowly reveals he is cheating on or manipulating his girlfriend. Every script must feel completely real — written by a human, not AI. The audience must not be able to tell it was generated.
+function smBuildRizz(platform) {
 
-Output ONLY the raw script. No stage directions. No brackets. No placeholder text like [mutual] or [name]. No commentary. No caption blocks at the end. No explanations. Just the script starting with **IMAGE 1**.
+  const hookEnergies = [
+    "bold_weird: he opens with something completely unexpected or slightly unhinged but delivered with total confidence — she is caught off guard and has to respond",
+    "bold_confident: he opens like he already knows this is going somewhere — no question marks, no begging, just certainty",
+    "bold_playful: he opens with something that makes her laugh before she can be annoyed — humor is the weapon",
+    "recovery: she opened on him first or replied to his story dismissively — he has to recover from a bad start and turn it around",
+    "glow_up_reversal: one of them used to reject the other or ignore them — now the power has shifted and the script is about that tension",
+    "late_night: 3am energy, something about the time makes people honest, he uses that to say something he would never say in daylight",
+    "sparring: she matches his energy from the start — equal banter, no clear winner, the audience enjoys watching two sharp people go at it",
+    "slow_burn: he opens calm and understated, she is not immediately impressed, he wins her over line by line without ever raising his energy"
+  ];
+
+  const rizzLines = [
+    "I'm not even trying to impress you. I just want you to make space for me naturally.",
+    "I don't want your attention. I want you to realize on your own that this makes sense.",
+    "You could ignore this. But you haven't. That means something.",
+    "I'm not rushing you. I just already know where this is going.",
+    "I'm patient. Especially when the wait is worth it.",
+    "You act unbothered but you're still here. So am I.",
+    "I'm not asking for your heart right now. Just your time. The rest follows.",
+    "I'm not competing with anyone. I'm just being consistent and letting that do the work.",
+    "I could try harder. But I don't think I need to with you.",
+    "The version of me that almost didn't text you would have regretted it forever.",
+    "I'm not here to chase you. I'm here because I'd rather you just choose to stay.",
+    "You're testing me a little and I don't mind. I'd do the same.",
+    "I'm not asking you to trust me yet. Just stop walking away.",
+    "I don't need you to fall for me. I just need you to give it a fair chance.",
+    "You keep replying. I think that tells us both something.",
+    "I'm not the kind of guy you have to wonder about. That's the whole point.",
+    "You could close the app right now. But you won't. And we both know why.",
+    "I'm not trying to be your everything. Just something worth remembering.",
+    "Most people talk to fill silence. I'm talking because I actually want to know you.",
+    "I'm not going anywhere. That's either a threat or a promise depending on how this goes."
+  ];
+
+  const endings = [
+    "she_caves_number: she gives him her number or agrees to something concrete — he ends on one calm confident line, never celebrates, just receives it like he knew it was coming. Hard cut.",
+    "he_wins_banter: he lands a line so clean she has absolutely nothing left to say — ends on his line, audience caption reacts, hard cut",
+    "mutual_win: no clear winner, they both end up genuinely vibing, the chemistry is undeniable, ends on an open note that feels like a beginning not an ending",
+    "chaos_twist: something completely wild interrupts — a third person appears, an accidental message, a reveal that recontextualizes everything — ends on the chaos, hard cut",
+    "she_caves_soft: she does not give her number but admits she likes talking to him — he ends it perfectly by not pushing, leaving her wanting more",
+    "cliffhanger: he says something so good the script just ends mid conversation — no resolution, audience is left wanting more, the ending IS the line"
+  ];
+
+  const captionStyles = [
+    "internal_monologue: he narrates his own thoughts to the audience like a running commentary — what he is thinking, why he made that move, what he is planning next",
+    "audience_address: he talks directly to the audience like they are watching with him in real time — reacting together to what just happened",
+    "self_aware_humor: he acknowledges when something backfired or when he got lucky — never takes himself too seriously, audience laughs with him",
+    "hype_caption: pure excitement when something works — short, loud, all caps, the audience feels his energy",
+    "strategic_reveal: he tells the audience what move he is about to make or just made — like a chess player explaining his thinking"
+  ];
+
+  const selectedEnergy = hookEnergies[Math.floor(Math.random() * hookEnergies.length)];
+  const selectedRizzLine = rizzLines[Math.floor(Math.random() * rizzLines.length)];
+  const selectedEnding = endings[Math.floor(Math.random() * endings.length)];
+  const selectedCaptionStyle = captionStyles[Math.floor(Math.random() * captionStyles.length)];
+  const imageCount = Math.floor(Math.random() * 14) + 7;
+  const rizzPlacement = Math.floor(imageCount * 0.4) + 2;
+
+  return `You are a viral social media script writer. You write fake DM rizz scripts where a guy slides into a girl's DMs and tries to win her over. The audience watches and laughs and gets impressed. This has nothing to do with loyalty tests or cheating. This is pure charisma, banter, confidence, and humor. The guy is always charming never desperate. The girl is always sharp never easy. The audience should feel like they are watching something real and entertaining.
+
+Output ONLY the raw script. No stage directions. No brackets. No placeholder text. No commentary. Nothing before or after. Start immediately with **IMAGE 1**.
+
+THIS SCRIPT MUST USE THESE EXACT CHOICES — decided before this prompt ran. Build everything around them naturally. Never announce them.
+HOOK ENERGY: ${selectedEnergy}
+RIZZ LINE: "${selectedRizzLine}"
+ENDING: ${selectedEnding}
+CAPTION STYLE: ${selectedCaptionStyle}
+TARGET LENGTH: ${imageCount} images total
+RIZZ LINE PLACEMENT: around image ${rizzPlacement}
+
+OPENING RULE — this is critical:
+Do NOT use any pre-written opening line. Invent a completely fresh, original, unexpected opening that perfectly matches the hook energy above. The opening must feel like something a real person would actually send — specific, human, slightly risky. Never generic. Never a pickup line from the internet. The best openings are ones the audience has never seen before. Surprise yourself.
+
+WHAT THE ENDING MEANS — execute exactly:
+- she_caves_number: she gives him her number or agrees to something concrete. He receives it like he knew it was coming — calm, confident, never celebrating. His final line is the last line. Hard cut.
+- he_wins_banter: he lands a line so clean she has nothing left. Caption reacts. His line is the last thing. Hard cut.
+- mutual_win: chemistry is undeniable, both end up genuinely into it, ends open like a beginning. His final line. Hard cut.
+- chaos_twist: something wild interrupts and recontextualizes everything — third person, accidental message, unexpected reveal. Ends on the chaos. Hard cut.
+- she_caves_soft: she admits she likes talking to him without fully caving. He does not push. Ends with him leaving space. His final line. Hard cut.
+- cliffhanger: he says something so perfect the script ends mid conversation. The line IS the ending. Hard cut.
 
 EXACT FORMAT:
 **IMAGE 1**
-2) STORY_REPLY:
-1) ${hook}
-2) [her short casual reply]
+[opening — invented fresh based on the hook energy above]
 -b-
 **IMAGE 2**
-2) [her opening line]
-2) [her second line]
-1) [his reply]
-1) [his second line]
--b-
-...continue...
+[continue conversation]
 -b-
 -m-
-Caption: "his exact words" [emoji outside quotes]
+Caption: "caption text" 😂
 -b-
-...continue until kill line. End immediately after his kill line. Nothing after it.
+...continue until ending plays out. End immediately after. Nothing after it.
 
 FORMAT RULES — never break these:
-- 6 to 10 images total. Never fewer than 6. Never more than 10.
-- Every image must have exactly 3 to 4 lines of dialogue. Never 2. Never 5. Never 6.
-- Every single line of dialogue must be SHORT. Maximum 8 words per line.
-- 1) = his lines (left gray bubble). 2) = her lines (right purple bubble)
+- Total images: exactly ${imageCount}. Never more never less.
+- Images vary in length naturally — some have 1 line, some 2, some 3, occasionally 4. Never uniform. Real texting is uneven and unpredictable.
+- Every line SHORT. Maximum 8 words per line. Split longer thoughts across separate bubbles on separate lines.
+- 1) = his lines = LEFT side = gray bubbles. 2) = her lines = RIGHT side = purple or blue bubbles.
 - -b- on its own line between every image every single time.
-- -m- then Caption: for memes — placed immediately after his most revealing line
-- 3 to 4 memes per script
-- Meme caption format exactly: Caption: "his exact words" emoji — emoji goes OUTSIDE the closing quote
-- Script ends immediately after his kill line. She does NOT respond after it. No seen text.
-- Natural conversation flow — not strict alternating 2)/1)/2)/1) every single line.
+- -m- then Caption: "text" emoji on the next line for captions. Place after the line that triggered the reaction, before -b-.
+- 4 to 7 captions total. Spread from early to late. Never two captions back to back — always at least one full image of dialogue between them. Never two captions in the same image.
+- Script ends on HIS final line always. She never gets the last word. Hard cut immediately after his final line.
+- Never use placeholder text like [name] or [place] anywhere. Invent every detail fully and specifically.
+- Every name used appears only once. Never reuse the same name anywhere in the script.
+- Never write [redacted] or [photo] or any placeholder. If a photo is sent write it as a natural action within the dialogue.
 
-CONTENT RULES:
-- She uses natural emojis throughout: 😏 👀 😭 😅 😇 💀 😐 🙃 etc
-- He uses casual lowercase texting: lmaoo, nah, ight, idk, wbu, fr, honestly, ngl, kinda, yeah, bet
-- HE brings up the girlfriend himself — she NEVER reveals she knows about a girlfriend BEFORE he mentions someone first.
-- She NEVER confronts him. Always stays curious, playful, casual, slightly flirty.
-- Every script must have a completely different hook, setting, scenario, manipulation style and kill line.
+CAPTION RULES — this section matters most for virality:
+Captions are in the style: ${selectedCaptionStyle}
+They must feel completely human written — casual, funny, self aware, audience facing. Never serious. Never AI sounding. Never explaining what just happened. Just reacting to it.
+Use these ONLY as energy inspiration — never copy directly:
+- "Damn I thought that shot was it"
+- "NOW WE GOT MOTION"
+- "IM TOO GOOD AT TS"
+- "She wildin now too???"
+- "Ts too easyyy"
+- "Yo she cooking me chat 😭"
+- "A challenge at last"
+- "I like this one"
+- "Cuz I like a handful 😌"
+- "Me and the chef when he pull up 💀"
+- "Not sure what else I was expecting wit that one"
+- "I ain't done yet tho"
+- "Ok fine I unblocked and hit"
+Invent something fresh every time. Match the moment exactly. Short is better. Funny is better. Real is better.
 
-THE KILL LINE:
-- One short line he drops completely casually, like it's nothing
-- So manipulative or revealing that the audience gasps even though he said it like nothing
-- Cut immediately after it. Nothing after. Script over.
+THE RIZZ LINE RULE:
+The rizz line "${selectedRizzLine}" must land around image ${rizzPlacement} — after warmup when she is already engaged but before the ending. It is the moment the audience goes quiet because it actually hits. Deliver it in his voice — casual, never dramatic. Her reaction immediately after is the best caption placement in the script. Never announce the rizz line. Just let it land.
 
-Story reply from her friend: "${hook}"
+STICKINESS RULES:
+- Every image must pull the reader to the next one. A question hanging. A line that needs a reaction. A moment that is not finished.
+- His lines feel effortless — confident without trying, funny without forcing it.
+- Her lines feel sharp — she gives him just enough to keep going but never makes it easy.
+- The banter feels like a tennis match. Neither side is losing for too long.
+- The rizz line feels earned. The audience feels it land.
+- The ending feels satisfying — either because he won or because the chemistry was undeniable.
+
+CONTENT RULES — never break these:
+- He uses casual texting: lmaoo, nah, fr, ngl, yk, lowkey, deadass, bet, idk, wbu, haha
+- She uses casual texting: same energy, slightly more restrained, occasionally cold then warm
+- Emojis used sparingly and naturally — not every line, only where a real person would
+- No cringe lines. No pickup lines from the internet. Everything must feel original and specific to this conversation.
+- No loyalty test content. No cheating. No girlfriend drama. This is purely about rizz and banter.
+- Scenarios are universal — anyone anywhere can understand and enjoy this.
+- This is always an Instagram DM or text conversation.
+- He is never desperate. Never begging. Never over explaining. Confidence is his default state.
+- She is never mean for no reason. Sharp yes. Cold at first yes. But always human.
+
+THE STRUCTURE:
+- Image 1: the opening — invented fresh, matches the hook energy, catches her off guard
+- Images 2 to ${rizzPlacement - 1}: warmup banter — she pushes back, he does not fold, audience enjoys the dynamic, captions land here
+- Image ${rizzPlacement}: rizz line lands — caption reacts, she is caught slightly off guard
+- Images after rizz line: she is slightly more open, he does not overplay it, banter continues toward ending
+- Final images: ending plays out exactly as described. His final line is the last line. Hard cut.
+
+Platform context: ${platform}
 
 Generate the script now. Start with **IMAGE 1**. Raw script only. Nothing else before or after it.`;
 }
+
 
 function _buildTypingPrompt() {
   return `You are a viral social media script writer. Write fake Instagram DM loyalty test scripts. Output ONLY the raw script. No stage directions, no brackets, no commentary. Just the script.
@@ -1454,7 +1561,7 @@ async function generateAIScript() {
   status.style.display = 'block';
   status.textContent = 'Cooking up your script...';
   try {
-    const prompt = _scriptType === 'slide' ? _buildSlidePrompt() : _buildTypingPrompt();
+    const prompt = _scriptType === 'slide' ? smBuildRizz('Instagram DMs') : _buildTypingPrompt();
     const resp = await fetch('/ai/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
