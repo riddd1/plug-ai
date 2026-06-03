@@ -2995,7 +2995,6 @@ function _tvFullFrame(ctx,W,H,state){
 }
 
 async function generateTypingVideo(){
-  const title=document.getElementById('tv-title').value.trim();
   const showKbd=document.getElementById('tv-keyboard').checked;
   const msgs=messages.filter(m=>m.type!=='batch_break'&&m.type!=='batch_meme'&&m.text);
   if(!msgs.length){alert('Add messages in the builder first');return;}
@@ -3005,14 +3004,62 @@ async function generateTypingVideo(){
   const seenText=(seenChk&&seenChk.checked&&seenTxtEl)?seenTxtEl.value.trim():'';
 
   const btn=document.getElementById('tv-gen-btn'),status=document.getElementById('tv-status');
-  btn.disabled=true;btn.textContent='Recording…';
-  status.style.display='block';status.textContent='Setting up…';
+  btn.disabled=true;btn.textContent='Capturing…';
+  status.style.display='block';status.textContent='Capturing conversation frames…';
 
+  const MAX=4;
   const W=1080,H=1920,FPS=30;
+  const S=W/390;
+  const bgColor=document.getElementById('c-bg')?.value||'#000';
+  const root=document.getElementById('capture-root');
+  const origMessages=[...messages];
+
+  // Pre-capture each conversation state (0..N messages) using html2canvas
+  const captures=[];
+  for(let n=0;n<=msgs.length;n++){
+    status.textContent=`Capturing frame ${n}/${msgs.length}…`;
+    const visible=msgs.slice(Math.max(0,n-MAX),n);
+    messages.splice(0,messages.length,...visible);
+    render();
+    await new Promise(r=>setTimeout(r,120));
+    const cap=await html2canvas(root,{scale:S,useCORS:true,allowTaint:true,backgroundColor:bgColor,logging:false});
+    captures.push(cap);
+  }
+  messages.splice(0,messages.length,...origMessages);
+  render();
+
+  btn.textContent='Recording…';
+  status.textContent='Recording…';
+
+  const KBD_H=showKbd?Math.round(310*S):0;
+  const BAR_H=Math.round(66*S);
+  const BAR_Y=H-KBD_H-BAR_H;
+
   const canvas=document.createElement('canvas');
   canvas.width=W;canvas.height=H;
   const ctx=canvas.getContext('2d');
-  const rightColor=document.getElementById('c-r1')?.value||'#7c5cbf';
+
+  function drawFrame(capIdx,inputText,dots){
+    ctx.fillStyle=bgColor;ctx.fillRect(0,0,W,H);
+    const cap=captures[capIdx];
+    if(cap)ctx.drawImage(cap,0,0);
+    if(dots&&dots.show){
+      const capH=cap?cap.height:200;
+      const dy=capH+6*S;
+      const MARG=14*S,bw=70*S,bh=42*S;
+      const bx=dots.side==='right'?W-MARG-bw:MARG;
+      _tvRR(ctx,bx,dy,bw,bh,20*S,'#262626');
+      const cy=dy+bh/2,cx0=bx+bw/2-11*S;
+      for(let d=0;d<3;d++){
+        const dp=((dots.phase||0)-d*120+720)%360;
+        const bob=-Math.max(0,Math.sin(dp*Math.PI/180))*5*S;
+        ctx.beginPath();ctx.arc(cx0+d*11*S,cy+bob,4.5*S,0,Math.PI*2);
+        ctx.fillStyle='rgba(255,255,255,0.7)';ctx.fill();
+      }
+    }
+    _tvDrawIGBar(ctx,W,S,BAR_Y,BAR_H,inputText);
+    if(showKbd)_tvDrawKeyboard(ctx,W,H,S,BAR_Y+BAR_H,inputText);
+  }
 
   const mimeTypes=['video/mp4;codecs=avc1.42E01E','video/mp4','video/webm;codecs=vp9','video/webm'];
   const mimeType=mimeTypes.find(mt=>{try{return MediaRecorder.isTypeSupported(mt);}catch(e){return false;}})||'video/webm';
@@ -3022,7 +3069,6 @@ async function generateTypingVideo(){
   const recorder=new MediaRecorder(stream,{mimeType,videoBitsPerSecond:10_000_000});
   const chunks=[];
   recorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
-
   recorder.onstop=()=>{
     const blob=new Blob(chunks,{type:mimeType});
     const url=URL.createObjectURL(blob);
@@ -3035,51 +3081,50 @@ async function generateTypingVideo(){
     closeTypingVideoModal();
   };
 
-  const visible=[];
-  const base=()=>({visMsgs:visible,inputText:null,typingDots:{show:false},title,showKbd,rightColor,seenText:'',showDelivered:false});
-
-  _tvFullFrame(ctx,W,H,base());
+  drawFrame(0,null,null);
   recorder.start();
   await new Promise(r=>setTimeout(r,500));
 
   for(let i=0;i<msgs.length;i++){
     const msg=msgs[i];
-    status.textContent=`Message ${i+1} / ${msgs.length}…`;
-
-    // Phase 1: dots (0.7s)
+    status.textContent=`Message ${i+1}/${msgs.length}…`;
+    // dots
     await new Promise(resolve=>{
       const start=Date.now();let raf;
       function tick(){
         const ms=Date.now()-start;
-        _tvFullFrame(ctx,W,H,{...base(),typingDots:{show:true,side:msg.side,phase:(ms/700)*360}});
+        drawFrame(i,null,{show:true,side:msg.side,phase:(ms/700)*360});
         if(ms<700)raf=requestAnimationFrame(tick);else{cancelAnimationFrame(raf);resolve();}
       }
       tick();
     });
-
-    // Phase 2: type chars
+    // type chars
     const text=msg.text;
-    const msPerChar=Math.max(35,(_tvSpeed*900)/Math.max(text.length,1));
+    const mpc=Math.max(35,(_tvSpeed*900)/Math.max(text.length,1));
     for(let c=1;c<=text.length;c++){
-      _tvFullFrame(ctx,W,H,{...base(),inputText:text.slice(0,c),typingDots:{show:false}});
-      await new Promise(r=>setTimeout(r,msPerChar));
+      drawFrame(i,text.slice(0,c),null);
+      await new Promise(r=>setTimeout(r,mpc));
     }
-
-    // Phase 3: send
-    visible.push(msg);
-    const isLast=i===msgs.length-1;
-    _tvFullFrame(ctx,W,H,{...base(),inputText:null,showDelivered:isLast&&!seenText});
+    // send
+    drawFrame(i+1,null,null);
     await new Promise(r=>setTimeout(r,_tvPause*1000));
   }
 
   if(seenText){
-    _tvFullFrame(ctx,W,H,{...base(),seenText,showDelivered:false});
+    drawFrame(msgs.length,null,null);
+    const lastCap=captures[msgs.length];
+    if(lastCap){
+      ctx.font=`${12*S}px system-ui,sans-serif`;
+      ctx.fillStyle='rgba(255,255,255,0.4)';ctx.textAlign='right';
+      ctx.fillText(seenText,W-14*S,lastCap.height+18*S);
+    }
     await new Promise(r=>setTimeout(r,1500));
   }
 
   await new Promise(r=>setTimeout(r,700));
   recorder.stop();
 }
+
 
 </script>
 
