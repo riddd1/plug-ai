@@ -162,6 +162,17 @@ select option{background:#1a1a1e}
 /* SEEN */
 .ig-seen{font-size:12px;color:rgba(255,255,255,0.45);text-align:right;padding:4px 16px 10px;}
 
+/* IG INPUT BAR */
+#ig-input-bar{display:flex;align-items:center;margin:8px 10px 12px;padding:5px 10px 5px 6px;background:rgba(255,255,255,0.06);border-radius:28px;gap:8px;border:1px solid rgba(255,255,255,0.06);flex-shrink:0}
+#capture-root.light-mode #ig-input-bar{background:rgba(0,0,0,0.06);border-color:rgba(0,0,0,0.08)}
+.ig-bar-cam{width:36px;height:36px;border-radius:50%;background:#8134AF;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ig-bar-cam svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ig-bar-msg{flex:1;font-size:15px;color:rgba(255,255,255,0.35);user-select:none}
+#capture-root.light-mode .ig-bar-msg{color:rgba(0,0,0,0.35)}
+.ig-bar-icons{display:flex;align-items:center;gap:13px;flex-shrink:0}
+.ig-bar-icons svg{width:23px;height:23px;fill:none;stroke:rgba(255,255,255,0.85);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#capture-root.light-mode .ig-bar-icons svg{stroke:rgba(0,0,0,0.7)}
+
 #loading{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:12px}
 #loading.show{display:flex}
 .spinner{width:34px;height:34px;border:3px solid rgba(255,255,255,0.15);border-top-color:#e8a87c;border-radius:50%;animation:spin .8s linear infinite}
@@ -505,9 +516,7 @@ select{border-radius:7px;border-color:rgba(139,92,246,0.18);transition:border-co
 .lp::-webkit-scrollbar{width:3px}
 .lp::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.25);border-radius:99px}
 
-/* Empty state hint in preview */
-#ig-msgs:empty{display:flex;align-items:center;justify-content:center;min-height:160px;padding:40px 24px}
-#ig-msgs:empty::after{content:"Add messages from the panel on the left";color:rgba(139,92,246,0.28);font-size:12px;text-align:center;line-height:1.7;letter-spacing:.2px}
+#ig-msgs:empty{min-height:120px}
 
 /* Smoother transitions across all interactive elements */
 button,input,select,textarea{transition-property:background,border-color,color,box-shadow,transform,opacity;transition-duration:.18s;transition-timing-function:ease}
@@ -842,6 +851,23 @@ button,input,select,textarea{transition-property:background,border-color,color,b
         <div id="ig-time-sep"></div>
         <div id="ig-story-hdr"></div>
         <div class="ig-messages" id="ig-msgs"></div>
+        <div id="ig-input-bar">
+          <div class="ig-bar-cam">
+            <!-- Camera icon -->
+            <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <span class="ig-bar-msg">Message...</span>
+          <div class="ig-bar-icons">
+            <!-- Mic — capsule body + arc + stem -->
+            <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+            <!-- Gallery — frame + sun dot + mountain polyline -->
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <!-- Sticker — IG style: rounded square + two dot eyes + smile arc -->
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="6"/><circle cx="8.5" cy="9.5" r="1.2" fill="rgba(255,255,255,0.85)" stroke="none"/><circle cx="15.5" cy="9.5" r="1.2" fill="rgba(255,255,255,0.85)" stroke="none"/><path d="M8 14.5c1.2 2 6.8 2 8 0" stroke-width="1.6"/></svg>
+            <!-- Plus in circle -->
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -2845,57 +2871,95 @@ function _tvDrawBubble(ctx,W,S,msg,y,MARG,rightColor,visMsgs,idx){
 function _tvDrawIGBar(ctx,W,S,barY,barH,inputText){
   const MARG=14*S;
   if(inputText!==null){
-    const sendW=52*S,sendH=36*S,inputH=46*S;
-    const inputW=W-MARG*2-sendW-10*S;
-    _tvRR(ctx,MARG,barY+(barH-inputH)/2,inputW,inputH,inputH/2,'#1c1c1e');
+    const btnH=46*S,bY=barY+(barH-btnH)/2,gap=8*S;
+    // Left: dark pill with search/magnifier icon
+    const searchW=46*S;
+    _tvRR(ctx,MARG,bY,searchW,btnH,btnH/2,'#1c1c1e');
+    ctx.strokeStyle='rgba(255,255,255,0.75)';ctx.lineWidth=2*S;ctx.lineCap='round';
+    const scx=MARG+searchW*0.43,scy=bY+btnH*0.43,sr=btnH*0.16;
+    ctx.beginPath();ctx.arc(scx,scy,sr,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(scx+sr*0.72,scy+sr*0.72);ctx.lineTo(MARG+searchW*0.7,bY+btnH*0.7);ctx.stroke();
+    // Right: purple pill with send arrow
+    const sendW=52*S,sx=W-MARG-sendW;
+    _tvRR(ctx,sx,bY,sendW,btnH,btnH/2,'#8134AF');
+    ctx.save();ctx.translate(sx+sendW/2,bY+btnH/2);
+    ctx.fillStyle='#fff';
+    ctx.beginPath();ctx.moveTo(9*S,-1*S);ctx.lineTo(-5*S,-8*S);ctx.lineTo(-3*S,-1*S);ctx.lineTo(-5*S,6*S);ctx.closePath();ctx.fill();
+    ctx.restore();
+    // Center: dark input pill with text + purple cursor
+    const inputX=MARG+searchW+gap,inputW=sx-gap-inputX;
+    _tvRR(ctx,inputX,bY,inputW,btnH,btnH/2,'#1c1c1e');
     ctx.font=`${16*S}px 'Apple Color Emoji','Segoe UI Emoji',system-ui,sans-serif`;
     ctx.fillStyle='#fff';ctx.textAlign='left';
-    ctx.fillText(inputText+'|',MARG+14*S,barY+barH*0.62);
-    const sx=MARG+inputW+10*S,sy=barY+(barH-sendH)/2;
-    _tvRR(ctx,sx,sy,sendW,sendH,sendH/2,'#7c5cbf');
-    ctx.fillStyle='#fff';ctx.font=`bold ${20*S}px system-ui`;ctx.textAlign='center';
-    ctx.fillText('↑',sx+sendW/2,sy+sendH*0.72);
+    const tx=inputX+14*S,ty=bY+btnH*0.63;
+    ctx.fillText(inputText,tx,ty);
+    const tw=ctx.measureText(inputText).width;
+    ctx.fillStyle='#8134AF';ctx.fillRect(tx+tw+1*S,bY+btnH*0.2,2*S,btnH*0.6);
   } else {
     const barW=W-MARG*2,barH2=50*S;
     _tvRR(ctx,MARG,barY+(barH-barH2)/2,barW,barH2,barH2/2,'#1c1c1e');
-    const camR=18*S,camCx=MARG+14*S+camR,camCy=barY+barH/2;
-    const grad=ctx.createRadialGradient(camCx-4,camCy-4,2,camCx,camCy,camR);
-    grad.addColorStop(0,'#8134AF');grad.addColorStop(1,'#DD2A7B');
-    ctx.beginPath();ctx.arc(camCx,camCy,camR,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();
+    const camR=18*S,camCx=MARG+12*S+camR,camCy=barY+barH/2;
+    ctx.beginPath();ctx.arc(camCx,camCy,camR,0,Math.PI*2);ctx.fillStyle='#8134AF';ctx.fill();
     ctx.fillStyle='#fff';ctx.font=`${16*S}px system-ui`;ctx.textAlign='center';
     ctx.fillText('📷',camCx,camCy+6*S);
-    ctx.font=`${16*S}px system-ui,sans-serif`;ctx.fillStyle='rgba(255,255,255,0.38)';ctx.textAlign='left';
-    ctx.fillText('Message...',MARG+14*S+camR*2+10*S,barY+barH*0.62);
+    ctx.font=`${16*S}px system-ui,sans-serif`;ctx.fillStyle='rgba(255,255,255,0.35)';ctx.textAlign='left';
+    ctx.fillText('Message...',MARG+12*S+camR*2+10*S,barY+barH*0.62);
     let ix=W-MARG-10*S;
-    const iData=[
-      {t:'circle+'},
-      {t:'rect'},
-      {t:'smile'},
-      {t:'mic'}
-    ];
-    const icSz=18*S,icGap=28*S,icCy=barY+barH/2;
-    ctx.strokeStyle='rgba(255,255,255,0.75)';ctx.lineWidth=1.5*S;
+    const icSz=18*S,icGap=26*S,icCy=barY+barH/2;
+    ctx.strokeStyle='rgba(255,255,255,0.85)';ctx.lineWidth=1.5*S;
     // + circle
-    ctx.beginPath();ctx.arc(ix,icCy,icSz*0.55,0,Math.PI*2);ctx.stroke();
-    ctx.font=`bold ${13*S}px system-ui`;ctx.fillStyle='rgba(255,255,255,0.75)';ctx.textAlign='center';
+    ctx.beginPath();ctx.arc(ix,icCy,icSz*0.52,0,Math.PI*2);ctx.stroke();
+    ctx.font=`bold ${15*S}px system-ui`;ctx.fillStyle='rgba(255,255,255,0.85)';ctx.textAlign='center';
     ctx.fillText('+',ix,icCy+5*S);ix-=icGap;
-    // sticker (rounded square with smile)
+    // sticker — rounded square + two dot eyes + smile arc
+    const stx=ix-icSz*0.5,sty=icCy-icSz*0.5,sr=icSz*0.22;
+    ctx.strokeStyle='rgba(255,255,255,0.85)';
     ctx.beginPath();
-    ctx.moveTo(ix-icSz*0.5+4*S,icCy-icSz*0.5);
-    ctx.arcTo(ix+icSz*0.5,icCy-icSz*0.5,ix+icSz*0.5,icCy+icSz*0.5,4*S);
-    ctx.arcTo(ix+icSz*0.5,icCy+icSz*0.5,ix-icSz*0.5,icCy+icSz*0.5,4*S);
-    ctx.arcTo(ix-icSz*0.5,icCy+icSz*0.5,ix-icSz*0.5,icCy-icSz*0.5,4*S);
-    ctx.arcTo(ix-icSz*0.5,icCy-icSz*0.5,ix+icSz*0.5,icCy-icSz*0.5,4*S);
-    ctx.closePath();ctx.stroke();ix-=icGap;
-    // gallery (mountain icon)
+    ctx.moveTo(stx+sr,sty);ctx.lineTo(stx+icSz-sr,sty);
+    ctx.arcTo(stx+icSz,sty,stx+icSz,sty+sr,sr);
+    ctx.lineTo(stx+icSz,sty+icSz-sr);
+    ctx.arcTo(stx+icSz,sty+icSz,stx+icSz-sr,sty+icSz,sr);
+    ctx.lineTo(stx+sr,sty+icSz);
+    ctx.arcTo(stx,sty+icSz,stx,sty+icSz-sr,sr);
+    ctx.lineTo(stx,sty+sr);
+    ctx.arcTo(stx,sty,stx+sr,sty,sr);
+    ctx.closePath();ctx.stroke();
+    ctx.beginPath();ctx.arc(ix-icSz*0.18,icCy-icSz*0.06,icSz*0.09,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.85)';ctx.fill();
+    ctx.beginPath();ctx.arc(ix+icSz*0.18,icCy-icSz*0.06,icSz*0.09,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.85)';
+    ctx.beginPath();ctx.arc(ix,icCy+icSz*0.1,icSz*0.24,0.25,Math.PI-0.25);ctx.stroke();
+    ix-=icGap;
+    // gallery — rounded frame + sun dot + mountain
+    const gx=ix-icSz*0.5,gy=icCy-icSz*0.5,gr=2*S;
+    ctx.strokeStyle='rgba(255,255,255,0.85)';
     ctx.beginPath();
-    ctx.moveTo(ix-icSz*0.5,icCy-icSz*0.5);
-    ctx.lineTo(ix+icSz*0.5,icCy-icSz*0.5);ctx.lineTo(ix+icSz*0.5,icCy+icSz*0.5);
-    ctx.lineTo(ix-icSz*0.5,icCy+icSz*0.5);ctx.closePath();ctx.stroke();ix-=icGap;
-    // mic
-    ctx.beginPath();ctx.arc(ix,icCy-5*S,5*S,0,Math.PI*2);ctx.stroke();
-    ctx.beginPath();ctx.arc(ix,icCy-5*S,9*S,0,Math.PI);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(ix,icCy+4*S);ctx.lineTo(ix,icCy+9*S);ctx.stroke();
+    ctx.moveTo(gx+gr,gy);ctx.lineTo(gx+icSz-gr,gy);
+    ctx.arcTo(gx+icSz,gy,gx+icSz,gy+gr,gr);
+    ctx.lineTo(gx+icSz,gy+icSz-gr);
+    ctx.arcTo(gx+icSz,gy+icSz,gx+icSz-gr,gy+icSz,gr);
+    ctx.lineTo(gx+gr,gy+icSz);
+    ctx.arcTo(gx,gy+icSz,gx,gy+icSz-gr,gr);
+    ctx.lineTo(gx,gy+gr);
+    ctx.arcTo(gx,gy,gx+gr,gy,gr);
+    ctx.closePath();ctx.stroke();
+    ctx.beginPath();ctx.arc(gx+icSz*0.3,gy+icSz*0.3,icSz*0.12,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(gx+icSz,gy+icSz*0.65);ctx.lineTo(gx+icSz*0.65,gy+icSz*0.38);ctx.lineTo(gx,gy+icSz);ctx.stroke();
+    ix-=icGap;
+    // mic — capsule body + holder arc + stem + base
+    ctx.strokeStyle='rgba(255,255,255,0.85)';
+    const mw=icSz*0.38,mh=icSz*0.5,mR=icSz*0.19,mtop=icCy-icSz*0.44;
+    ctx.beginPath();
+    ctx.moveTo(ix-mw/2+mR,mtop);ctx.lineTo(ix+mw/2-mR,mtop);
+    ctx.arcTo(ix+mw/2,mtop,ix+mw/2,mtop+mR,mR);
+    ctx.lineTo(ix+mw/2,mtop+mh-mR);
+    ctx.arcTo(ix+mw/2,mtop+mh,ix,mtop+mh,mR);
+    ctx.arcTo(ix-mw/2,mtop+mh,ix-mw/2,mtop+mh-mR,mR);
+    ctx.lineTo(ix-mw/2,mtop+mR);
+    ctx.arcTo(ix-mw/2,mtop,ix-mw/2+mR,mtop,mR);
+    ctx.closePath();ctx.stroke();
+    ctx.beginPath();ctx.arc(ix,mtop+mh,icSz*0.33,Math.PI,0,true);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(ix,mtop+mh+icSz*0.33);ctx.lineTo(ix,icCy+icSz*0.46);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(ix-icSz*0.28,icCy+icSz*0.46);ctx.lineTo(ix+icSz*0.28,icCy+icSz*0.46);ctx.stroke();
   }
 }
 
@@ -3014,7 +3078,9 @@ async function generateTypingVideo(){
   const root=document.getElementById('capture-root');
   const origMessages=[...messages];
 
-  // Pre-capture each conversation state (0..N messages) using html2canvas
+  // Pre-capture each conversation state — hide the input bar so it doesn't duplicate
+  const igBar=document.getElementById('ig-input-bar');
+  if(igBar)igBar.style.display='none';
   const captures=[];
   for(let n=0;n<=msgs.length;n++){
     status.textContent=`Capturing frame ${n}/${msgs.length}…`;
@@ -3027,6 +3093,7 @@ async function generateTypingVideo(){
   }
   messages.splice(0,messages.length,...origMessages);
   render();
+  if(igBar)igBar.style.display='';
 
   btn.textContent='Recording…';
   status.textContent='Recording…';
