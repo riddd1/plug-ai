@@ -731,7 +731,7 @@ button,input,select,textarea{transition-property:background,border-color,color,b
           <button class="abtn" id="gen-slide-btn-b" onclick="selectScriptType('slide')" style="flex:1;justify-content:center;background:rgba(232,168,124,0.12);border-color:rgba(232,168,124,0.4);color:#e8a87c;padding:5px">Slide Scripts</button>
           <button class="abtn" id="gen-typing-btn-b" onclick="selectScriptType('typing')" style="flex:1;justify-content:center;padding:5px">Typing Scripts</button>
         </div>
-        <button class="gbtn" onclick="generateAIScript()" style="padding:9px;font-size:11px">✨ Generate Script</button>
+        <button class="gbtn" id="ai-gen-btn-b" onclick="generateAIScript()" style="padding:9px;font-size:11px">✨ Generate Script</button>
       </div>
     </div>
 
@@ -759,7 +759,7 @@ button,input,select,textarea{transition-property:background,border-color,color,b
         <button class="abtn" id="gen-typing-btn" onclick="selectScriptType('typing')" style="flex:1;justify-content:center;padding:5px">Typing Scripts</button>
       </div>
       <button class="gbtn" id="ai-gen-btn" onclick="generateAIScript()" style="padding:9px;font-size:11px">✨ Generate Script</button>
-      <div id="ai-gen-status" style="display:none;font-size:10px;color:rgba(255,255,255,0.4);text-align:center;padding:2px 0"></div>
+      <div id="ai-gen-status" style="display:none;font-size:12px;color:rgba(255,255,255,0.75);text-align:center;padding:6px 0;letter-spacing:.3px"></div>
     </div>
 
 
@@ -1554,12 +1554,21 @@ Output the raw script only. Start with **IMAGE 1**. No other text.`;
 
 async function generateAIScript() {
   const btn = document.getElementById('ai-gen-btn');
+  const btnB = document.getElementById('ai-gen-btn-b');
   const status = document.getElementById('ai-gen-status');
-  const orig = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = 'Generating...';
+  const origBtn = btn ? btn.innerHTML : '';
+  const origBtnB = btnB ? btnB.innerHTML : '';
+  const dots = ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏'];
+  let dotIdx = 0;
+  if (btn) { btn.disabled = true; btn.innerHTML = dots[0] + ' Generating'; }
+  if (btnB) { btnB.disabled = true; btnB.innerHTML = dots[0] + ' Generating'; }
   status.style.display = 'block';
-  status.textContent = 'Cooking up your script...';
+  status.textContent = '✦ Cooking up your script…';
+  const ticker = setInterval(() => {
+    dotIdx = (dotIdx + 1) % dots.length;
+    if (btn) btn.innerHTML = dots[dotIdx] + ' Generating';
+    if (btnB) btnB.innerHTML = dots[dotIdx] + ' Generating';
+  }, 80);
   try {
     const prompt = _scriptType === 'slide' ? smBuildRizz('Instagram DMs') : _buildTypingPrompt();
     const resp = await fetch('/ai/generate', {
@@ -1582,8 +1591,9 @@ async function generateAIScript() {
     status.textContent = '✗ ' + (e.message || 'Failed');
     setTimeout(() => { status.style.display = 'none'; }, 3000);
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = orig;
+    clearInterval(ticker);
+    if (btn) { btn.disabled = false; btn.innerHTML = origBtn; }
+    if (btnB) { btnB.disabled = false; btnB.innerHTML = origBtnB; }
   }
 }
 
