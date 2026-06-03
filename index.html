@@ -3072,6 +3072,7 @@ function _tvFullFrame(ctx,W,H,state){
 
 async function generateTypingVideo(){
   const showKbd=document.getElementById('tv-keyboard').checked;
+  const showBar=document.getElementById('tv-show-bar').checked;
   const msgs=messages.filter(m=>m.type!=='batch_break'&&m.type!=='batch_meme'&&m.text);
   if(!msgs.length){alert('Add messages in the builder first');return;}
 
@@ -3093,8 +3094,10 @@ async function generateTypingVideo(){
   const bgColor=document.getElementById('c-bg')?.value||'#000';
   const root=document.getElementById('capture-root');
   const origMessages=[...messages];
+  const igBar=document.getElementById('ig-input-bar');
+  const igTime=document.getElementById('ig-time-sep');
 
-  // Capture each conversation state WITH the bar included (idle bar comes from preview)
+  // Capture each conversation state
   const captures=[];
   for(let n=0;n<=msgs.length;n++){
     if(genOverlayTxt)genOverlayTxt.textContent=`Capturing frame ${n+1} of ${msgs.length+1}…`;
@@ -3102,12 +3105,18 @@ async function generateTypingVideo(){
     const visible=msgs.slice(Math.max(0,n-MAX),n);
     messages.splice(0,messages.length,...visible);
     render();
+    // Time only shows in first frame (n===1), hide it for all others
+    if(igTime)igTime.style.display=n===1?'block':'none';
+    // Bar hidden if toggle off
+    if(igBar&&!showBar)igBar.style.display='none';
     await new Promise(r=>setTimeout(r,120));
     const cap=await html2canvas(root,{scale:S,useCORS:true,allowTaint:true,backgroundColor:bgColor,logging:false});
     captures.push(cap);
   }
   messages.splice(0,messages.length,...origMessages);
   render();
+  // Restore bar visibility
+  if(igBar)igBar.style.display='';
 
   btn.textContent='Recording…';
   status.textContent='Recording…';
@@ -3259,6 +3268,10 @@ async function generateTypingVideo(){
     <div style="display:flex;align-items:center;gap:8px">
       <input type="checkbox" id="tv-keyboard" style="accent-color:#10b981;width:14px;height:14px">
       <label for="tv-keyboard" style="font-size:11px;color:rgba(255,255,255,0.6);cursor:pointer">Show keyboard at bottom</label>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="tv-show-bar" checked style="accent-color:#10b981;width:14px;height:14px">
+      <label for="tv-show-bar" style="font-size:11px;color:rgba(255,255,255,0.6);cursor:pointer">Show message bar</label>
     </div>
 
     <div id="tv-status" class="tv-status"></div>
