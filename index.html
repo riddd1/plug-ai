@@ -1200,9 +1200,8 @@ function render() {
   const c1=document.getElementById('c-r1').value, c2=document.getElementById('c-r2').value;
   const bold=document.getElementById('bold-chk').checked;
 
-  // Only show last 4 messages in live preview (matches typing video window)
-  const visMsgs=messages.filter(m=>m.type!=='batch_break'&&m.type!=='batch_meme').slice(-4);
-  const totalRight=visMsgs.filter(m=>m.side==='right').length;
+  // Count right-side messages for cross-conversation gradient
+  const totalRight=messages.filter(m=>m.side==='right'&&m.type!=='batch_break'&&m.type!=='batch_meme').length;
   let rightIdx=0;
   let firstMsg=true;
 
@@ -1252,9 +1251,10 @@ function render() {
   container.innerHTML='';
   container.style.paddingTop=storySrc?'2px':'4px';
 
-  visMsgs.forEach((m,i)=>{
-    const prevSame=i>0&&visMsgs[i-1].side===m.side;
-    const nextSame=i<visMsgs.length-1&&visMsgs[i+1].side===m.side;
+  messages.forEach((m,i)=>{
+    if (m.type==='batch_break'||m.type==='batch_meme') return;
+    const prevSame=i>0&&messages[i-1].type!=='batch_break'&&messages[i-1].type!=='batch_meme'&&messages[i-1].side===m.side;
+    const nextSame=i<messages.length-1&&messages[i+1].type!=='batch_break'&&messages[i+1].type!=='batch_meme'&&messages[i+1].side===m.side;
     const isFirst=!prevSame, isLast=!nextSame;
 
     // Per-bubble right color: interpolate c1→c2 across all right messages
