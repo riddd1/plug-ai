@@ -3090,9 +3090,7 @@ async function generateTypingVideo(){
   const root=document.getElementById('capture-root');
   const origMessages=[...messages];
 
-  // Pre-capture each conversation state — hide the input bar so it doesn't duplicate
-  const igBar=document.getElementById('ig-input-bar');
-  if(igBar)igBar.style.display='none';
+  // Capture each conversation state WITH the bar included (idle bar comes from preview)
   const captures=[];
   for(let n=0;n<=msgs.length;n++){
     if(genOverlayTxt)genOverlayTxt.textContent=`Capturing frame ${n+1} of ${msgs.length+1}…`;
@@ -3106,7 +3104,6 @@ async function generateTypingVideo(){
   }
   messages.splice(0,messages.length,...origMessages);
   render();
-  if(igBar)igBar.style.display='';
 
   btn.textContent='Recording…';
   status.textContent='Recording…';
@@ -3123,11 +3120,14 @@ async function generateTypingVideo(){
   function drawFrame(capIdx,inputText,dots){
     ctx.fillStyle=bgColor;ctx.fillRect(0,0,W,H);
     const cap=captures[capIdx];
-    if(cap)ctx.drawImage(cap,0,0);
+    // Bottom-anchor: messages+bar sit at the bottom of the frame
+    if(cap){
+      const capY=Math.max(0,H-KBD_H-cap.height);
+      ctx.drawImage(cap,0,capY);
+    }
     if(dots&&dots.show){
-      const capH=cap?cap.height:200;
-      const dy=capH+6*S;
       const MARG=14*S,bw=70*S,bh=42*S;
+      const dy=BAR_Y-bh-6*S;
       const bx=dots.side==='right'?W-MARG-bw:MARG;
       _tvRR(ctx,bx,dy,bw,bh,20*S,'#262626');
       const cy=dy+bh/2,cx0=bx+bw/2-11*S;
@@ -3138,8 +3138,12 @@ async function generateTypingVideo(){
         ctx.fillStyle='rgba(255,255,255,0.7)';ctx.fill();
       }
     }
-    _tvDrawIGBar(ctx,W,S,BAR_Y,BAR_H,inputText);
-    if(showKbd)_tvDrawKeyboard(ctx,W,H,S,BAR_Y+BAR_H,inputText);
+    // Idle: bar is already in the capture. Typing: overlay canvas bar on top.
+    if(inputText!==null){
+      ctx.fillStyle=bgColor;ctx.fillRect(0,BAR_Y,W,BAR_H);
+      _tvDrawIGBar(ctx,W,S,BAR_Y,BAR_H,inputText);
+    }
+    if(showKbd)_tvDrawKeyboard(ctx,W,H,S,BAR_Y+BAR_H,inputText||'');
   }
 
   const mimeTypes=['video/mp4;codecs=avc1.42E01E','video/mp4','video/webm;codecs=vp9','video/webm'];
@@ -3163,11 +3167,12 @@ async function generateTypingVideo(){
     closeTypingVideoModal();
   };
 
-  drawFrame(0,null,null);
+  // Start with first message already visible (not typed)
+  drawFrame(1,null,null);
   recorder.start();
-  await new Promise(r=>setTimeout(r,500));
+  await new Promise(r=>setTimeout(r,600));
 
-  for(let i=0;i<msgs.length;i++){
+  for(let i=1;i<msgs.length;i++){
     const msg=msgs[i];
     status.textContent=`Message ${i+1}/${msgs.length}…`;
     // dots
@@ -3194,12 +3199,9 @@ async function generateTypingVideo(){
 
   if(seenText){
     drawFrame(msgs.length,null,null);
-    const lastCap=captures[msgs.length];
-    if(lastCap){
-      ctx.font=`${12*S}px system-ui,sans-serif`;
-      ctx.fillStyle='rgba(255,255,255,0.4)';ctx.textAlign='right';
-      ctx.fillText(seenText,W-14*S,lastCap.height+18*S);
-    }
+    ctx.font=`${12*S}px system-ui,sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,0.4)';ctx.textAlign='right';
+    ctx.fillText(seenText,W-14*S,BAR_Y-8*S);
     await new Promise(r=>setTimeout(r,1500));
   }
 
