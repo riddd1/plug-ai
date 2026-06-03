@@ -175,6 +175,10 @@ select option{background:#1a1a1e}
 
 #loading{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:12px}
 #loading.show{display:flex}
+#tv-gen-overlay{display:none;position:absolute;inset:0;z-index:10;background:rgba(0,0,0,0.82);backdrop-filter:blur(4px);align-items:center;justify-content:center;flex-direction:column;gap:10px;border-radius:8px}
+#tv-gen-overlay.show{display:flex}
+#tv-gen-overlay .tvo-spinner{width:28px;height:28px;border:3px solid rgba(255,255,255,0.12);border-top-color:#8134AF;border-radius:50%;animation:spin .8s linear infinite}
+#tv-gen-overlay .tvo-text{font-size:12px;color:rgba(255,255,255,0.55);text-align:center}
 .spinner{width:34px;height:34px;border:3px solid rgba(255,255,255,0.15);border-top-color:#e8a87c;border-radius:50%;animation:spin .8s linear infinite}
 .loading-text{font-size:12px;color:rgba(255,255,255,0.6)}
 .loading-progress{font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px}
@@ -847,6 +851,10 @@ button,input,select,textarea{transition-property:background,border-color,color,b
       <button id="crop-confirm" onclick="confirmCrop()">✓ Download</button>
       <button id="crop-cancel" onclick="cancelCrop()">Cancel</button>
 
+      <div id="tv-gen-overlay">
+        <div class="tvo-spinner"></div>
+        <div class="tvo-text" id="tv-gen-overlay-txt">Generating video…</div>
+      </div>
       <div id="capture-root">
         <div id="ig-time-sep"></div>
         <div id="ig-story-hdr"></div>
@@ -1192,8 +1200,9 @@ function render() {
   const c1=document.getElementById('c-r1').value, c2=document.getElementById('c-r2').value;
   const bold=document.getElementById('bold-chk').checked;
 
-  // Count right-side messages for cross-conversation gradient
-  const totalRight=messages.filter(m=>m.side==='right'&&m.type!=='batch_break'&&m.type!=='batch_meme').length;
+  // Only show last 4 messages in live preview (matches typing video window)
+  const visMsgs=messages.filter(m=>m.type!=='batch_break'&&m.type!=='batch_meme').slice(-4);
+  const totalRight=visMsgs.filter(m=>m.side==='right').length;
   let rightIdx=0;
   let firstMsg=true;
 
@@ -1243,10 +1252,9 @@ function render() {
   container.innerHTML='';
   container.style.paddingTop=storySrc?'2px':'4px';
 
-  messages.forEach((m,i)=>{
-    if (m.type==='batch_break'||m.type==='batch_meme') return;
-    const prevSame=i>0&&messages[i-1].type!=='batch_break'&&messages[i-1].type!=='batch_meme'&&messages[i-1].side===m.side;
-    const nextSame=i<messages.length-1&&messages[i+1].type!=='batch_break'&&messages[i+1].type!=='batch_meme'&&messages[i+1].side===m.side;
+  visMsgs.forEach((m,i)=>{
+    const prevSame=i>0&&visMsgs[i-1].side===m.side;
+    const nextSame=i<visMsgs.length-1&&visMsgs[i+1].side===m.side;
     const isFirst=!prevSame, isLast=!nextSame;
 
     // Per-bubble right color: interpolate c1→c2 across all right messages
@@ -3071,6 +3079,10 @@ async function generateTypingVideo(){
   btn.disabled=true;btn.textContent='Capturing…';
   status.style.display='block';status.textContent='Capturing conversation frames…';
 
+  const genOverlay=document.getElementById('tv-gen-overlay');
+  const genOverlayTxt=document.getElementById('tv-gen-overlay-txt');
+  if(genOverlay)genOverlay.classList.add('show');
+
   const MAX=4;
   const W=1080,H=1920,FPS=30;
   const S=W/390;
@@ -3083,6 +3095,7 @@ async function generateTypingVideo(){
   if(igBar)igBar.style.display='none';
   const captures=[];
   for(let n=0;n<=msgs.length;n++){
+    if(genOverlayTxt)genOverlayTxt.textContent=`Capturing frame ${n+1} of ${msgs.length+1}…`;
     status.textContent=`Capturing frame ${n}/${msgs.length}…`;
     const visible=msgs.slice(Math.max(0,n-MAX),n);
     messages.splice(0,messages.length,...visible);
@@ -3097,6 +3110,7 @@ async function generateTypingVideo(){
 
   btn.textContent='Recording…';
   status.textContent='Recording…';
+  if(genOverlayTxt)genOverlayTxt.textContent='Recording typing animation…';
 
   const KBD_H=showKbd?Math.round(310*S):0;
   const BAR_H=Math.round(66*S);
@@ -3145,6 +3159,7 @@ async function generateTypingVideo(){
     setTimeout(()=>URL.revokeObjectURL(url),3000);
     btn.disabled=false;btn.textContent='🎬 Generate Video';
     status.style.display='none';
+    if(genOverlay)genOverlay.classList.remove('show');
     closeTypingVideoModal();
   };
 
