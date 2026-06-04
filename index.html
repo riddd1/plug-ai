@@ -1338,27 +1338,53 @@ function selectScriptType(type) {
 
 function smBuildRizz(platform) {
 
-  const imageCount = Math.floor(Math.random() * 10) + 8;
-  const endings = [
-    'she gives him her number — he receives it calm, never celebrates, one final line then hard cut',
-    'he lands a line so clean she has absolutely nothing — ends on his line, caption reacts, hard cut',
-    'they end up genuinely vibing, no clear winner, ends open like something is about to start',
-    'chaos twist — third person appears, accidental message, or something wild recontextualizes everything, hard cut',
-    'she admits she likes talking to him but does not fully cave — he leaves space, his final line, hard cut',
-    'he says something so good the script just ends there — no resolution, the line IS the ending'
+  const imageCount = Math.floor(Math.random() * 10) + 10;
+
+  const openings = [
+    "he opens with something bold and slightly unhinged — she shuts him down immediately",
+    "he slides in with total confidence like it is already decided — she is not impressed",
+    "he opens with something funny and self aware — she clowns him back",
+    "he opens with something unexpectedly smooth — she pretends not to care",
+    "he opens after a long time has passed — she wants to know why now",
+    "he responds to something she posted and makes it about them — she is not having it",
+    "he opens by making her laugh before she can be annoyed — she stays but acts unbothered",
+    "he opens with something risky and slightly stupid — it should not work but he commits anyway"
   ];
 
+  const struggles = [
+    "she leaves him on read for a while — he sends another message anyway",
+    "she tells him he has no chance — he acts like she said the opposite",
+    "she clowns his opener hard — he laughs with her and pivots",
+    "she tries to end the conversation — he finds a reason to keep it going",
+    "she says she is not interested — he does not argue, just keeps being himself",
+    "she gives one word replies — he treats each one like a full conversation",
+    "she brings up a reason it would not work — he turns it into a reason it would"
+  ];
+
+  const endings = [
+    "she gives him her number — he gets it like he always knew he would, one calm final line",
+    "she agrees to meet up or come over — he lands one last line and it ends there",
+    "chaos twist — third person appears, wrong number revealed, sister shows up, something wild recontextualizes everything",
+    "she cracks and admits she likes talking to him — he does not overplay it, one final line",
+    "he lands a line so clean she literally has nothing — caption reacts, hard cut on his line",
+    "she finally replies after leaving him on read — the payoff lands in one line from him"
+  ];
+
+  const selectedOpening = openings[Math.floor(Math.random() * openings.length)];
+  const selectedStruggle = struggles[Math.floor(Math.random() * struggles.length)];
   const selectedEnding = endings[Math.floor(Math.random() * endings.length)];
 
-  return `You are a viral social media skit writer. You write fake DM rizz skits where a guy slides into a girl's DMs and tries to win her over. This is performed content for an audience — the captions are the creator talking directly to camera between scenes, reacting to what just happened, performing for laughs. The audience knows it is a skit. The humor is intentional. The guy always knows the camera is there.
+  return `You are a viral social media skit writer. You write fake DM rizz skits where a guy tries to win a girl over. The audience watches him struggle, adapt, and eventually win or get a reaction. This is performed content — the captions are the creator talking directly to the audience like he is on camera between scenes.
 
-This has nothing to do with loyalty tests or cheating. This is pure charisma, banter, confidence, and comedy.
+This has nothing to do with loyalty tests or cheating.
 
 Output ONLY the raw script. Nothing before or after. Start immediately with **IMAGE 1**.
 
-THE MOST IMPORTANT RULE:
-Do not use any template. Do not reach for a familiar move. The best skits feel specific — like they could only exist between these two people in this exact moment. If the opener sounds like something you have seen before throw it out. If the rizz line sounds like it came from a list throw it out. If the caption sounds like a description throw it out. Build everything from scratch.
+THE CORE ENERGY — understand this before you write a single line:
+The guy is confident. Not arrogant. Confident. He does not fold when she shuts him down. He does not get defensive. He does not apologize. He finds another angle and keeps going. That is the show. The audience is watching to see if he can crack her — and the longer she resists the more invested they get. The struggle is not a bad thing. The struggle is the content.
 
+OPENING: ${selectedOpening}
+STRUGGLE: ${selectedStruggle}
 ENDING: ${selectedEnding}
 LENGTH: ${imageCount} images exactly
 
@@ -1366,79 +1392,92 @@ FORMAT — non negotiable:
 - Every image starts with **IMAGE N** where N is the number. Never skip this.
 - 2) = his lines = RIGHT side = the guy is always 2)
 - 1) = her lines = LEFT side = she is always 1)
-- -b- on its own line between every single image without exception
-- -m- then Caption: "text" on the next line for captions — after the line that triggered it, before the -b-
-- CAPTIONS ARE MANDATORY — exactly 4 to 6 captions spread through the script, never fewer than 4
+- -b- on its own line between EVERY SINGLE IMAGE without exception — this is critical, check every transition
+- -m- then Caption: "text" on the next line for captions — placed after the line that triggered it, before the -b-
+- CAPTIONS ARE MANDATORY — exactly 4 to 7 captions spread through the script, never fewer than 4
 - Never two captions back to back — at least one full image of dialogue between any two captions
-- Never two captions in the same image
-- Images vary in length — some 1 line, some 2, some 3, occasionally 4 — never uniform
+- Never two captions in the same image UNLESS it is a recap image showing the full conversation — only then
+- Images vary in length — some 1 line, some 2, some 3, occasionally 4 — never uniform, never the same twice in a row
 - Every line maximum 8 words — split longer thoughts across separate bubbles
 - Script ends on HIS final line — he is 2) — hard cut, she never gets the last word
 - Never use placeholder text — invent every detail fully
-- Never write a real looking phone number — use obviously fake digits like 555
-- ZERO emojis anywhere — not in dialogue, not in captions, nowhere, no exceptions
+- Never write a real looking phone number — use obviously blurred or fake digits
+- The final caption can never be the last thing — there must always be at least one line of his dialogue after the final caption
 
-CAPTION RULES — this is where most scripts fail:
-Captions are the creator talking directly to the audience between scenes. They are performative, funny, self aware. They are NOT describing what just happened. They are REACTING to it for laughs.
+CAPTION RULES — the most important section:
+Captions are the creator reacting to the audience in real time. He is on camera. He is performing. He is talking to chat.
 
-HARD LIMIT: maximum 6 words per caption. If it is 7 words it is already too long. Cut it.
-All lowercase or ALL CAPS. Never mixed. No punctuation except question marks.
-The caption must be funny or hyped or self aware — never explaining, never describing.
+HARD RULES:
+- Maximum 6 words per caption. Hard limit. 7 words is already too long.
+- All lowercase OR ALL CAPS. Never mixed. No punctuation except question marks and exclamation marks.
+- The caption reacts to what just happened — never describes it, never explains it
+- Sometimes he admits the L to the audience — that is funny and builds trust
+- Sometimes he hypes himself when it works — that is the payoff
+- Sometimes he talks strategy — "watch what happens" energy
+- Sometimes he is just shocked — one word or one phrase is enough
 
-Right energy:
+Right energy — study these, never copy them:
+- "Game."
+- "She folding"
+- "AYOOOO???"
+- "Oops"
+- "Chat what am I doing"
+- "This line unpatched yall"
+- "She takin me for a fool"
+- "Watch what happens when you maintain your frame"
+- "Not my proudest moment"
+- "YO WAIT LET ME COOK"
+- "WHAT AM I SAYING BRO"
+- "I proved every second of that minute"
+- "Ts too easyyy"
 - "NOW WE GOT MOTION"
-- "she wildin"
-- "i ain't done yet"
-- "ts too easy"
-- "bro I lied through my teeth"
-- "she cooking me rn"
 - "I beg your finest pardon"
-- "wait she actually"
-- "chat go quiet"
+- "I ain't done yet tho"
 
 Wrong energy:
-- "she said somehow and that word is doing a lot of work" — too long, too explaining
-- "i meant every word of that and it still felt too smooth" — describing not reacting
-- "she just accidentally gave me a challenge and she knows it" — way too long
+- Anything over 6 words that is not ALL CAPS
+- Anything that describes what just happened
+- Anything that sounds like a narrator not a creator
+- Anything that could appear in a loyalty test script
 
-Invent something fresh every time. Never copy the examples. React to the specific moment. Keep it short. Keep it human.
-
-HOW TO THINK ABOUT THE OPENING:
-Do not pick from a list. What is the single most unexpected specific thing this guy could say right now. Not a pickup line. Not a generic compliment. Something grounded in something real and observable — something she posted, something specific, something that makes her pause and think wait how does he even know that. Surprise yourself first.
-
-HOW TO THINK ABOUT THE RIZZ LINE:
-One moment in the middle where he says something that genuinely lands. Not poetic for the sake of it. Something true and specific to this conversation that hits because it fits this exact moment. Her reaction after it is the best caption placement in the script. It should feel earned — built toward by everything before it.
-
-HOW TO THINK ABOUT HER:
-Sharp. Gives just enough to keep going but never makes it easy. Short dry lines. Occasionally funny. Always slightly ahead of where he expects her to be. Never a pushover. Never mean for no reason. A real person.
+Invent something fresh every time. Never copy the examples. React to the specific moment. Keep it short. Keep it human. Keep it funny.
 
 HOW TO THINK ABOUT HIM:
-Confident without arrogant. Does not over explain. Does not apologize. Does not beg. When she pushes back he does not fold — he just keeps going like it was always the plan. His best moments are when he says less than expected. He knows the camera is there but he never breaks character to the girl — only to the audience through captions.
+He is the main character and he knows it. He opens with something bold. She shuts him down. He does not care. He finds another angle. She shuts him down again. He does not care. He keeps going. The audience is watching because they want to see if he can do it — and his refusal to quit is what makes them root for him. His best lines are the ones that should not work but somehow do. He never begs. He never explains himself. He never apologizes for being interested.
+
+HOW TO THINK ABOUT HER:
+She is not easy. She is sharp. She clowns him sometimes. She goes cold sometimes. She leaves him on read sometimes. She is a real person who is genuinely entertained but trying not to show it. Her crack — the moment she stops resisting — is the payoff the whole script builds toward. It should feel earned.
+
+HOW TO THINK ABOUT THE STRUGGLE:
+The struggle is not failure. The struggle is the show. Every time she shuts him down the audience leans in more. Every time he finds another angle without folding the audience respects him more. The struggle should escalate — each rejection slightly harder than the last, each recovery slightly more impressive.
+
+HOW TO THINK ABOUT THE RIZZ MOMENT:
+Somewhere in the middle he says something that genuinely lands. Not a line from a list. Something specific to this conversation that hits because it fits this exact moment. Her reaction to it — even if she tries to hide it — is the best caption placement in the script. It should feel earned by everything before it.
 
 STICKINESS:
-Every image pulls the reader to the next. A question hanging. A line that needs a reaction. A beat that is not finished. Tension builds across the whole script. The ending feels earned.
+Every image pulls to the next. A question hanging. A line that needs a reaction. The audience should never feel like they can stop. The struggle builds. The crack approaches. The ending lands.
 
 CONTENT:
-- Casual texting — lmaoo, nah, fr, ngl, yk, lowkey, bet, idk, haha
-- Zero emojis — none anywhere, no exceptions
+- Casual texting — lmaoo, nah, fr, ngl, yk, lowkey, bet, idk, haha, wyd, wsp, acc, shi, ts
+- Emojis used naturally and sparingly — only where a real person would, not every line
 - No cringe. No pickup lines from the internet. Everything specific to this conversation.
 - Universal — anyone anywhere can enjoy this
 - Instagram DM or text conversation
 
 STRUCTURE:
-- Image 1: fresh unexpected opener that catches her off guard
-- Images 2 to halfway: warmup banter, she pushes back, he holds, captions land
-- Middle: the line that lands — caption reacts — best moment in the script
-- After middle: she slightly more open, he does not overplay it
+- Image 1: the opening — bold, specific, catches her off guard
+- Images 2 to 4: first wave of resistance — she shuts him down, he does not fold, captions land
+- Middle: the struggle intensifies — she is harder to crack, he finds new angles, best caption moments here
+- Rizz moment: one line that lands somewhere in the middle — caption reacts
 - Final images: ending plays out, his final line is last, hard cut
 
-BEFORE OUTPUTTING — check these:
+BEFORE OUTPUTTING — check every single one:
 1. -b- between every single image without exception
 2. Every image has **IMAGE N** header
-3. 4 to 6 captions in the script
-4. Every caption is 6 words or fewer
-5. Zero emojis anywhere
-6. Script ends on his line 2)
+3. 4 to 7 captions spread through the script
+4. Every caption is 6 words or fewer unless ALL CAPS
+5. Script ends on his line 2) with dialogue after the final caption
+6. No two captions back to back
 
 If any check fails fix it before outputting.
 
@@ -1459,7 +1498,7 @@ RHYTHM: Every line pulls the reader into the next. Each line drops a crumb, rais
 FORMAT:
 **IMAGE 1**
 2) STORY_REPLY:
-1) [Write the girlfriend's hook message to her friend. A varied test phrase + one specific suspicious thing she noticed. End with a single emoji 😐 🙃 🥺]
+1) [Write the girlfriend's c message to her friend. A varied test phrase + one specific suspicious thing she noticed. End with a single emoji 😐 🙃 🥺]
 2) [short punchy reaction — 1 to 3 words + 🫶]
 -b-
 **IMAGE 2**
