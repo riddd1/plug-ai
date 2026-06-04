@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DM Studio — IG Conversation Creator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -805,7 +806,7 @@ button,input,select,textarea{transition-property:background,border-color,color,b
         <svg viewBox="0 0 24 24"><rect x="9" y="2" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         Copy Preview HTML
       </button>
-      <button class="gbtn sec" onclick="openRangePicker()">
+      <button class="gbtn sec" onclick="downloadPagesPNG()">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Download PNG
       </button>
@@ -1693,6 +1694,76 @@ renderMsgList();
 render();
 
 // ── RANGE PICKER ──
+async function downloadPagesPNG() {
+  // Split messages into batches by -b- breaks
+  const batches = [];
+  let current = [];
+  for (const m of messages) {
+    if (m.type === 'batch_break') {
+      if (current.length > 0) { batches.push([...current]); current = []; }
+    } else {
+      current.push(m);
+    }
+  }
+  if (current.length > 0) batches.push([...current]);
+
+  const usable = batches.filter(b => b.some(m => m.type !== 'batch_meme'));
+  if (usable.length === 0) { alert('No messages to capture.'); return; }
+
+  const origMessages = [...messages];
+  const bgColor = document.getElementById('c-bg').value;
+  const root = document.getElementById('capture-root');
+  const igTimeSep = document.getElementById('ig-time-sep');
+  const loadEl = document.getElementById('loading');
+  const progressEl = document.getElementById('loading-progress');
+  loadEl.classList.add('show');
+
+  const canvases = [];
+  try {
+    for (let i = 0; i < usable.length; i++) {
+      progressEl.textContent = `Capturing image ${i + 1} of ${usable.length}…`;
+      messages.splice(0, messages.length, ...usable[i]);
+      render();
+      if (igTimeSep) igTimeSep.style.display = i === 0 ? 'block' : 'none';
+      await new Promise(r => setTimeout(r, 150));
+      const canvas = await html2canvas(root, {scale:3, useCORS:true, allowTaint:true, backgroundColor:bgColor, logging:false});
+      canvases.push(canvas);
+    }
+  } finally {
+    messages.splice(0, messages.length, ...origMessages);
+    render();
+    if (igTimeSep) igTimeSep.style.display = 'block';
+  }
+
+  progressEl.textContent = 'Packaging…';
+
+  if (canvases.length === 1) {
+    const a = document.createElement('a');
+    a.download = 'slide-1.png';
+    a.href = canvases[0].toDataURL('image/png');
+    a.click();
+    loadEl.classList.remove('show');
+    return;
+  }
+
+  try {
+    const zip = new JSZip();
+    canvases.forEach((canvas, i) => {
+      const b64 = canvas.toDataURL('image/png').split(',')[1];
+      zip.file(`${i + 1}.png`, b64, {base64: true});
+    });
+    const blob = await zip.generateAsync({type:'blob'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'slides.zip'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  } catch(e) {
+    alert('Zip failed: ' + e.message);
+  }
+  loadEl.classList.remove('show');
+  progressEl.textContent = '';
+}
+
 let rangeStart = -1, rangeEnd = -1;
 
 function openRangePicker() {
