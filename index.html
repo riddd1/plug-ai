@@ -441,11 +441,9 @@ select{border-radius:7px;border-color:rgba(139,92,246,0.18);transition:border-co
 /* Create Slideshow — fuchsia/purple */
 .bottom-btns > button:nth-child(3){background:linear-gradient(90deg,#7c3aed,#db2777)!important;border:none!important;color:#fff!important}
 .bottom-btns > button:nth-child(3):hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(219,39,119,0.4)!important;opacity:1!important}
-/* Typing Video — teal/green */
+/* TYPING VIDEO — commented out
 .bottom-btns > button:nth-child(4){background:linear-gradient(90deg,#059669,#10b981)!important;border:none!important;color:#fff!important}
 .bottom-btns > button:nth-child(4):hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(16,185,129,0.4)!important;opacity:1!important}
-
-/* ── Typing Video Modal ── */
 #typing-video-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:400;align-items:center;justify-content:center;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 #typing-video-modal.show{display:flex}
 .tv-box{background:#141416;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:22px;width:340px;display:flex;flex-direction:column;gap:14px;box-shadow:0 24px 80px rgba(0,0,0,0.7)}
@@ -461,6 +459,7 @@ select{border-radius:7px;border-color:rgba(139,92,246,0.18);transition:border-co
 .tv-gen:disabled{opacity:.4;cursor:default}
 .tv-cancel{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);border-radius:8px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
 .tv-status{font-size:11px;color:rgba(255,255,255,0.4);text-align:center;display:none}
+*/
 
 /* ── Preview area — dot grid canvas feel ── */
 .preview-area{background-color:#07070e;background-image:radial-gradient(rgba(139,92,246,0.08) 1px,transparent 1px);background-size:22px 22px}
@@ -729,7 +728,7 @@ button,input,select,textarea{transition-property:background,border-color,color,b
         <div style="height:1px;background:rgba(255,255,255,0.07)"></div>
         <div style="display:flex;gap:4px">
           <button class="abtn" id="gen-slide-btn-b" onclick="selectScriptType('slide')" style="flex:1;justify-content:center;background:rgba(232,168,124,0.12);border-color:rgba(232,168,124,0.4);color:#e8a87c;padding:5px">Slide Scripts</button>
-          <button class="abtn" id="gen-typing-btn-b" onclick="selectScriptType('typing')" style="flex:1;justify-content:center;padding:5px">Typing Scripts</button>
+          <!-- <button class="abtn" id="gen-typing-btn-b" onclick="selectScriptType('typing')" style="flex:1;justify-content:center;padding:5px">Typing Scripts</button> -->
         </div>
         <button class="gbtn" id="ai-gen-btn-b" onclick="generateAIScript()" style="padding:9px;font-size:11px">✨ Generate Script</button>
       </div>
@@ -756,7 +755,7 @@ button,input,select,textarea{transition-property:background,border-color,color,b
       <div style="height:1px;background:rgba(255,255,255,0.07);margin:2px 0"></div>
       <div style="display:flex;gap:4px">
         <button class="abtn" id="gen-slide-btn" onclick="selectScriptType('slide')" style="flex:1;justify-content:center;background:rgba(232,168,124,0.12);border-color:rgba(232,168,124,0.4);color:#e8a87c;padding:5px">Slide Scripts</button>
-        <button class="abtn" id="gen-typing-btn" onclick="selectScriptType('typing')" style="flex:1;justify-content:center;padding:5px">Typing Scripts</button>
+        <!-- <button class="abtn" id="gen-typing-btn" onclick="selectScriptType('typing')" style="flex:1;justify-content:center;padding:5px">Typing Scripts</button> -->
       </div>
       <button class="gbtn" id="ai-gen-btn" onclick="generateAIScript()" style="padding:9px;font-size:11px">✨ Generate Script</button>
       <div id="ai-gen-status" style="display:none;font-size:12px;color:rgba(255,255,255,0.75);text-align:center;padding:6px 0;letter-spacing:.3px"></div>
@@ -814,10 +813,10 @@ button,input,select,textarea{transition-property:background,border-color,color,b
         <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
         Create Slideshow
       </button>
-      <button class="gbtn sec" onclick="openTypingVideoModal()">
+      <!-- <button class="gbtn sec" onclick="openTypingVideoModal()">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         Typing Video
-      </button>
+      </button> -->
     </div>
   </div>
 
@@ -1486,6 +1485,7 @@ Platform context: ${platform}
 Generate the script now. Start with **IMAGE 1**. Raw script only. Nothing else.`;
 }
 
+/* TYPING VIDEO — commented out
 function _buildTypingPrompt() {
   return `You are a viral social media script writer. Write fake Instagram DM loyalty test scripts. Output ONLY the raw script. No stage directions, no brackets, no commentary. Just the script.
 
@@ -1539,6 +1539,7 @@ THE KILL LINE:
 
 Output the raw script only. Start with **IMAGE 1**. No other text.`;
 }
+*/
 
 async function generateAIScript() {
   const btn = document.getElementById('ai-gen-btn');
@@ -2074,6 +2075,8 @@ async function generateSlideshow() {
   const frames = [], durations = [];
   const totalFrames = unifiedSlides.filter(s => s.type === 'image' || (s.type === 'dm' && s.selected)).length;
   let frameCount = 0;
+  const igTimeSep = document.getElementById('ig-time-sep');
+  let firstDmSlide = true;
 
   document.getElementById('loading').classList.add('show');
   Object.values(domMap).forEach(({el}) => { el.style.display = 'none'; });
@@ -2109,6 +2112,8 @@ async function generateSlideshow() {
       if (item.type === 'dm' && item.selected && domMap[item.id]) {
         frameCount++;
         document.getElementById('loading-progress').textContent = `Capturing frame ${frameCount} / ${totalFrames}…`;
+        if (igTimeSep) igTimeSep.style.display = firstDmSlide ? 'block' : 'none';
+        firstDmSlide = false;
         domMap[item.id].el.style.display = domMap[item.id].nat;
         batchVisible.push(item.id);
         await new Promise(r => setTimeout(r, 150));
@@ -2118,6 +2123,7 @@ async function generateSlideshow() {
     }
 
     Object.values(domMap).forEach(({el}) => { el.style.display = ''; });
+    if (igTimeSep) igTimeSep.style.display = 'block';
     if (frames.length === 0) { document.getElementById('loading').classList.remove('show'); return; }
     if (!slideshowAudio.file && slideshowAudio.blobUrl) {
       const unlocked = audioStash.find(a => a.blobUrl === slideshowAudio.blobUrl && a.file);
@@ -2907,6 +2913,7 @@ function showToast(msg) {
 
 // ══════════════════════════════════════════════════════════════════════
 // ── TYPING VIDEO v2 ──
+/* TYPING VIDEO — commented out
 // ══════════════════════════════════════════════════════════════════════
 let _tvSpeed = 2, _tvPause = 1;
 
@@ -3199,21 +3206,20 @@ async function generateTypingVideo(){
   await new Promise(r=>setTimeout(r,700));
   recorder.stop();
 }
+*/
 
 
 </script>
 
-<!-- TYPING VIDEO MODAL -->
+<!-- TYPING VIDEO MODAL — commented out
 <div id="typing-video-modal">
   <div class="tv-box">
     <div class="tv-heading">📱 Typing Video</div>
     <div class="tv-sub">Creates a video of your conversation appearing message by message with typing animation</div>
-
     <div>
       <div class="tv-lbl">Caption (optional)</div>
       <input class="tv-input" id="tv-title" placeholder='e.g. "My rizz 💀" or "His loyalty test"' maxlength="60">
     </div>
-
     <div>
       <div class="tv-lbl">Typing speed</div>
       <div class="tv-btns">
@@ -3222,7 +3228,6 @@ async function generateTypingVideo(){
         <button class="tv-btn" data-speed="1" onclick="tvSetSpeed(1)">Fast</button>
       </div>
     </div>
-
     <div>
       <div class="tv-lbl">Pause after each message</div>
       <div class="tv-btns">
@@ -3231,17 +3236,16 @@ async function generateTypingVideo(){
         <button class="tv-btn" data-pause="2" onclick="tvSetPause(2)">Long</button>
       </div>
     </div>
-
     <div style="display:flex;align-items:center;gap:8px">
       <input type="checkbox" id="tv-keyboard" style="accent-color:#10b981;width:14px;height:14px">
       <label for="tv-keyboard" style="font-size:11px;color:rgba(255,255,255,0.6);cursor:pointer">Show keyboard at bottom</label>
     </div>
-
     <div id="tv-status" class="tv-status"></div>
     <button class="tv-gen" id="tv-gen-btn" onclick="generateTypingVideo()">🎬 Generate Video</button>
     <button class="tv-cancel" onclick="closeTypingVideoModal()">Cancel</button>
   </div>
 </div>
+-->
 
 <!-- RANGE PICKER MODAL -->
 <div id="range-modal">
