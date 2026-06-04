@@ -565,7 +565,7 @@ button,input,select,textarea{transition-property:background,border-color,color,b
 #stash-meme-picker.show{display:flex}
 .smp-box{background:#0e0e1c;border:1px solid rgba(139,92,246,0.22);border-radius:22px;padding:28px;width:min(720px,92vw);max-height:92vh;display:flex;flex-direction:column;gap:18px;box-shadow:0 28px 90px rgba(0,0,0,0.8)}
 .smp-title{font-size:15px;font-weight:800;color:#fff}
-.smp-grid{columns:2;column-gap:14px;overflow-y:auto;flex:1;min-height:0}
+.smp-grid{columns:3;column-gap:10px;overflow-y:auto;flex:1;min-height:0}
 .smp-card{break-inside:avoid;margin-bottom:14px;border-radius:14px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .16s;background:rgba(255,255,255,0.05)}
 .smp-card:hover{border-color:rgba(139,92,246,0.7);transform:scale(1.04);box-shadow:0 6px 20px rgba(139,92,246,0.3)}
 .smp-card img{width:100%;height:auto;display:block}
@@ -2759,7 +2759,28 @@ let _pendingMemeTarget = -1;
 
 function showMemeSourcePicker(msgIdx) {
   _pendingMemeTarget = msgIdx;
-  document.getElementById('meme-source-modal').classList.add('show');
+  openBuiltinMemePicker();
+}
+
+function openBuiltinMemePicker() {
+  const grid = document.getElementById('smp-grid');
+  if (typeof BUILTIN_MEMES !== 'undefined' && BUILTIN_MEMES.length) {
+    grid.innerHTML = BUILTIN_MEMES.map((src, i) =>
+      `<div class="smp-card" onclick="selectBuiltinMeme(${i})"><img src="${src}" alt=""></div>`
+    ).join('');
+  } else {
+    grid.innerHTML = '<div class="smp-empty">No built-in memes found.</div>';
+  }
+  document.getElementById('stash-meme-picker').classList.add('show');
+}
+
+function selectBuiltinMeme(idx) {
+  if (_pendingMemeTarget >= 0 && typeof BUILTIN_MEMES !== 'undefined') {
+    messages[_pendingMemeTarget].img = BUILTIN_MEMES[idx];
+    renderMsgList(); render(); syncBuilderToCode();
+  }
+  closeStashMemePicker();
+  _pendingMemeTarget = -1;
 }
 
 function selectMemeSource(source) {
@@ -3415,9 +3436,12 @@ async function generateTypingVideo(){
 <!-- STASH MEME PICKER -->
 <div id="stash-meme-picker">
   <div class="smp-box">
-    <div class="smp-title">Pick from Meme Stash</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div class="smp-title">Pick a Meme</div>
+      <button onclick="pendingMsgIdx=_pendingMemeTarget;closeStashMemePicker();document.getElementById('msg-file').click()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.6);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit">Upload instead</button>
+    </div>
     <div class="smp-grid" id="smp-grid">
-      <div class="smp-empty">Loading stash…</div>
+      <div class="smp-empty">Loading…</div>
     </div>
     <button class="smp-cancel" onclick="closeStashMemePicker()">Cancel</button>
   </div>
@@ -3435,5 +3459,6 @@ async function generateTypingVideo(){
 </div>
 
 <script>renderMemeStash(); renderAudioStash();</script>
+<script src="memes.js"></script>
 </body>
 </html>
