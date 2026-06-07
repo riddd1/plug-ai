@@ -10,7 +10,7 @@ router.post('/generate', async (req, res) => {
 
   try {
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: 'claude-opus-4-8',
       max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }],
     });
