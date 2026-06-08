@@ -18,3 +18,7 @@ hooks images/
 auddio.js
 auddio/
 .DS_Store
+
+# Reaction images (hardcoded locally, not in repo)
+rxn/
+rxn-images.js
